@@ -15,7 +15,7 @@ public class Person implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name= "name", nullable = false)
     private String name;
@@ -26,20 +26,21 @@ public class Person implements Serializable {
     @Column(name= "email", nullable = false, unique = true)
     private String email;
 
-    public Person() {}
+    public Person() { super();}
 
     public Person(String name, String email) {
+        super();
         this.name = name;
        // this.address = address;
         this.email = email;
     }
 
     // Getteri i setteri
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -69,11 +70,17 @@ public class Person implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Person)) return false;
-        Person person = (Person) o;
-        return Objects.equals(id, person.id) &&
-                Objects.equals(email, person.email);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Person p = (Person) o;
+        if (p.email == null || email == null) {
+            return false;
+        }
+        return Objects.equals(email, p.email);
     }
 
     @Override
