@@ -4,7 +4,7 @@ package com.isa.OnlyBuns.dto;
 import com.isa.OnlyBuns.model.Person;
 
 public class PersonDTO {
-    private Long id;
+    private Integer id;
     private String name;
     private String email;
 
@@ -16,7 +16,7 @@ public class PersonDTO {
         this.email = person.getEmail();
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 

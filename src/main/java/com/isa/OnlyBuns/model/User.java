@@ -1,20 +1,22 @@
 package com.isa.OnlyBuns.model;
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 public class User implements Serializable {
 
     //private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Person person;
+
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -35,11 +37,11 @@ public class User implements Serializable {
     }
 
     // Getteri i setteri
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -67,12 +69,25 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public Boolean getActive() {
+    public Boolean getIsActive() {
         return active;
     }
 
-    public void setActive(Boolean active) {
+    public void setIsActive(Boolean active) {
         this.active = active;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return  Objects.equals(username, user.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash( username);
     }
 
     @Override
@@ -85,4 +100,3 @@ public class User implements Serializable {
                 '}';
     }
 }
-
