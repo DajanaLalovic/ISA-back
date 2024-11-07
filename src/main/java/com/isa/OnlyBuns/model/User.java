@@ -12,10 +12,14 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Column(name= "name", nullable = false)
+    private String name;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "person_id", referencedColumnName = "id")
-    private Person person;
+    // @Column(nullable = false)
+    // private String address;
+
+    @Column(name= "email", nullable = false, unique = true)
+    private String email;
 
 
     @Column(nullable = false, unique = true)
@@ -29,8 +33,8 @@ public class User implements Serializable {
 
     public User() {}
 
-    public User(Person person, String username, String password) {
-        this.person = person;
+    public User( String username, String password) {
+
         this.username = username;
         this.password = password;
         this.active = false;
@@ -45,12 +49,20 @@ public class User implements Serializable {
         this.id = id;
     }
 
-    public Person getPerson() {
-        return person;
+    public String getEmail() {
+        return email;
     }
 
-    public void setPerson(Person person) {
-        this.person = person;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getUsername() {
@@ -94,8 +106,10 @@ public class User implements Serializable {
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", person=" + person +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
                 ", active=" + active +
                 '}';
     }

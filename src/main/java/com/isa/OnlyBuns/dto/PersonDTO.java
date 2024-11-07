@@ -11,7 +11,7 @@ public class PersonDTO {
     public PersonDTO() {}
 
     public PersonDTO(Person person) {
-        this.id = person.getId();
+       // this.id = person.getId();
         this.name = person.getName();
         this.email = person.getEmail();
     }
