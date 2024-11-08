@@ -53,6 +53,7 @@ public class PostDTO {
         return longitude;
     }
 
+
     public Integer getUserId() {
         return userId;
     }

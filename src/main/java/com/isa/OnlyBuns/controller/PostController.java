@@ -38,7 +38,7 @@ public class PostController {
         post.setLatitude(postDTO.getLatitude());
         post.setLongitude(postDTO.getLongitude());
         post.setCreatedAt(LocalDateTime.now());
-        post.setUserId(postDTO.getId());
+        post.setUserId(postDTO.getUserId());
 
         Post savedPost = postService.save(post);
         return new ResponseEntity<>(new PostDTO(savedPost), HttpStatus.CREATED);
