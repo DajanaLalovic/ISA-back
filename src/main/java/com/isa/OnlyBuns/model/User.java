@@ -1,20 +1,29 @@
 package com.isa.OnlyBuns.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "user")
-public class User implements Serializable {
+@Table(name = "USERS")
+public class User implements UserDetails, Serializable {
 
     //private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name= "name", nullable = false)
     private String name;
+
+    @Column(name= "surname", nullable = false)
+    private String surname;
 
     // @Column(nullable = false)
     // private String address;
@@ -31,6 +40,12 @@ public class User implements Serializable {
     @Column(nullable = false)
     private Boolean active = false;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private List<Role> roles;
+
     public User() {}
 
     public User( String username, String password) {
@@ -41,11 +56,11 @@ public class User implements Serializable {
     }
 
     // Getteri i setteri
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -59,6 +74,12 @@ public class User implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+    public String getSurname() {
+        return surname;
+    }
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public void setEmail(String email) {
@@ -88,6 +109,20 @@ public class User implements Serializable {
     public void setIsActive(Boolean active) {
         this.active = active;
     }
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    @JsonIgnore
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles;
+    }
+
 
     @Override
     public boolean equals(Object o) {
