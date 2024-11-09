@@ -1,4 +1,5 @@
 package com.isa.OnlyBuns.config;
+
 import com.isa.OnlyBuns.security.auth.RestAuthenticationEntryPoint;
 import com.isa.OnlyBuns.security.auth.TokenAuthenticationFilter;
 import com.isa.OnlyBuns.service.CustomUserDetailsService;

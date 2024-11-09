@@ -31,7 +31,6 @@ public class User implements UserDetails, Serializable {
     @Column(name= "email", nullable = false, unique = true)
     private String email;
 
-
     @Column(nullable = false, unique = true)
     private String username;
 
@@ -150,3 +149,4 @@ public class User implements UserDetails, Serializable {
                 '}';
     }
 }
+

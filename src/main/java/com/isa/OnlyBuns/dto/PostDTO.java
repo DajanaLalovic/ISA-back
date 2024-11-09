@@ -3,6 +3,7 @@ package com.isa.OnlyBuns.dto;
 import com.isa.OnlyBuns.model.Post;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class PostDTO {
 
@@ -13,18 +14,20 @@ public class PostDTO {
     private double latitude;
     private double longitude;
     private LocalDateTime createdAt;
-    private Integer userId;
+    private long userId;
+    private List<CommentDTO> comments;
+    private List<Integer> likes;
     private boolean isRemoved;
 
     public PostDTO() {
     }
 
     public PostDTO(Post post) {
-        this(post.getId(), post.getDescription(), post.getImagePath(), post.getLatitude(),post.getLongitude(),post.getCreatedAt(), post.getUserId(),post.getIsRemoved());
+        this(post.getId(), post.getDescription(), post.getImagePath(), post.getLatitude(),post.getLongitude(),post.getCreatedAt(), post.getUserId(),post.getIsRemoved(),null,null);
     }
 
 
-    public PostDTO(Integer id, String description,String imagePath, double latitude, double longitude, LocalDateTime createdAt, Integer userId,boolean isRemoved) {
+    public PostDTO(Integer id, String description,String imagePath, double latitude, double longitude, LocalDateTime createdAt, long userId,boolean isRemoved,List<CommentDTO> comments,List<Integer> likes) {
         this.id = id;
         this.description = description;
         this.latitude = latitude;
@@ -33,6 +36,8 @@ public class PostDTO {
         this.createdAt = createdAt;
         this.userId = userId;
         this.isRemoved = isRemoved;
+        this.comments = comments;
+        this.likes = likes;
     }
 
     public Integer getId() {
@@ -56,12 +61,30 @@ public class PostDTO {
     }
 
 
-    public Integer getUserId() {
+    public long getUserId() {
         return userId;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    public boolean getIsRemoved() {return isRemoved;}
+
+    public boolean getIsRemoved() {
+        return isRemoved;
+    }
+    public List<CommentDTO> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDTO> comments) {
+        this.comments = comments;
+    }
+
+    public List<Integer> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(List<Integer> likes) {
+        this.likes = likes;
+    }
 }

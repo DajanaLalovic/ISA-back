@@ -4,6 +4,7 @@ package com.isa.OnlyBuns.util;
 import java.util.Date;
 
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.isa.OnlyBuns.model.User;
@@ -59,7 +60,8 @@ public class TokenUtils {
      * @param username Korisničko ime korisnika kojem se token izdaje
      * @return JWT token
      */
-    private SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+
+   private SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
     public String generateToken(String username) {
         return Jwts.builder()

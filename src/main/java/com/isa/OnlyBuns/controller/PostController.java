@@ -6,6 +6,7 @@ import com.isa.OnlyBuns.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class PostController {
     }
 
     @PostMapping(consumes = "application/json")
+
     public ResponseEntity<PostDTO> addNewPost(@RequestBody PostDTO postDTO){
         Post post = new Post();
         post.setDescription(postDTO.getDescription());
@@ -40,6 +42,8 @@ public class PostController {
         post.setCreatedAt(LocalDateTime.now());
         post.setUserId(postDTO.getUserId());
         post.setIsRemoved(postDTO.getIsRemoved());
+        post.setComments(new ArrayList<>());
+        post.setLikes(new ArrayList<>());
 
         Post savedPost = postService.save(post);
         return new ResponseEntity<>(new PostDTO(savedPost), HttpStatus.CREATED);
@@ -76,6 +80,8 @@ public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO) {
     post.setUserId(postDTO.getUserId());
     post.setImagePath(postDTO.getImagePath());
     post.setIsRemoved(postDTO.getIsRemoved());
+    post.setComments(new ArrayList<>());
+    post.setLikes(new ArrayList<>());
 
     post = postService.save(post);
     return new ResponseEntity<>(new PostDTO(post), HttpStatus.OK);
