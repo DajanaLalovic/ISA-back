@@ -41,7 +41,8 @@ public class PostController {
         post.setLongitude(postDTO.getLongitude());
         post.setCreatedAt(LocalDateTime.now());
         post.setUserId(postDTO.getUserId());
-
+        post.setComments(new ArrayList<>());
+        post.setLikes(new ArrayList<>());
         Post savedPost = postService.save(post);
         return new ResponseEntity<>(new PostDTO(savedPost), HttpStatus.CREATED);
     }
