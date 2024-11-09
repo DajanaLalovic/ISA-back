@@ -1,4 +1,13 @@
 package com.isa.OnlyBuns.iservice;
 
-public class IUserService {
+import com.isa.OnlyBuns.dto.UserDTO;
+import com.isa.OnlyBuns.model.User;
+
+import java.util.List;
+
+public interface IUserService {
+    User findById(Long id);
+    User findByUsername(String username);
+    List<User> findAll ();
+    User save(UserDTO userDTO);
 }

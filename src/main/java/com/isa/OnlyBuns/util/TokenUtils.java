@@ -3,6 +3,7 @@ package com.isa.OnlyBuns.util;
 
 import java.util.Date;
 
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.isa.OnlyBuns.model.User;
@@ -14,6 +15,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import javax.crypto.SecretKey;
 
 // Utility klasa za rad sa JSON Web Tokenima
 @Component
@@ -56,6 +59,8 @@ public class TokenUtils {
      * @param username Korisničko ime korisnika kojem se token izdaje
      * @return JWT token
      */
+    private SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+
     public String generateToken(String username) {
         return Jwts.builder()
                 .setIssuer(APP_NAME)
@@ -63,7 +68,7 @@ public class TokenUtils {
                 .setAudience(generateAudience())
                 .setIssuedAt(new Date())
                 .setExpiration(generateExpirationDate())
-                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+                .signWith(secretKey).compact();
 
 
         // moguce je postavljanje proizvoljnih podataka u telo JWT tokena pozivom funkcije .claim("key", value), npr. .claim("role", user.getRole())
@@ -234,16 +239,16 @@ public class TokenUtils {
      * @param userDetails Informacije o korisniku koji je vlasnik JWT tokena.
      * @return Informacija da li je token validan ili ne.
      */
-//    public Boolean validateToken(String token, UserDetails userDetails) {
-//        User user = (User) userDetails;
-//        final String username = getUsernameFromToken(token);
-//        final Date created = getIssuedAtDateFromToken(token);
-//
-//        // Token je validan kada:
-//        return (username != null // korisnicko ime nije null
-//                && username.equals(userDetails.getUsername()) // korisnicko ime iz tokena se podudara sa korisnickom imenom koje pise u bazi
-//                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate())); // nakon kreiranja tokena korisnik nije menjao svoju lozinku
-//    }
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        User user = (User) userDetails;
+        final String username = getUsernameFromToken(token);
+        final Date created = getIssuedAtDateFromToken(token);
+
+        // Token je validan kada:
+        return (username != null // korisnicko ime nije null
+                && username.equals(userDetails.getUsername()) // korisnicko ime iz tokena se podudara sa korisnickom imenom koje pise u bazi
+                ); // nakon kreiranja tokena korisnik nije menjao svoju lozinku
+    }
 
     /**
      * Funkcija proverava da li je lozinka korisnika izmenjena nakon izdavanja tokena.
