@@ -3,6 +3,7 @@ package com.isa.OnlyBuns.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Post {
@@ -27,7 +28,16 @@ public class Post {
     private LocalDateTime createdAt;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private long userId;
+
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Comment> comments;
+
+    @ElementCollection
+    @CollectionTable(name = "post_likes")
+    @Column(name = "user_id")
+    private List<Integer> likes;
 
     public Post() {
     }
@@ -38,7 +48,8 @@ public class Post {
                 double latitude,
                 double longitude,
                 LocalDateTime createdAt,
-                Integer userId) {
+                long userId,List<Comment> comments,
+                List<Integer> likes) {
 
         this.id = id;
         this.description = description;
@@ -47,6 +58,8 @@ public class Post {
         this.longitude = longitude;
         this.createdAt = createdAt;
         this.userId = userId;
+        this.comments = comments;
+        this.likes = likes;
     }
 
     public Integer getId() {
@@ -73,7 +86,7 @@ public class Post {
         return createdAt;
     }
 
-    public Integer getUserId() {
+    public long getUserId() {
         return userId;
     }
 
@@ -97,8 +110,23 @@ public class Post {
         this.createdAt = createdAt;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
+    }
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public List<Integer> getLikes() {
+        return likes;
+    }
+
+    public void setLikes(List<Integer> likes) {
+        this.likes = likes;
     }
 
     @Override
@@ -111,6 +139,8 @@ public class Post {
                 ", longitude=" + longitude +
                 ", createdAt=" + createdAt +
                 ", userId=" + userId +
+                ", comments=" + comments +
+                ", likes=" + likes +
                 '}';
     }
 }

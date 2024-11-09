@@ -77,7 +77,8 @@ public class WebSecurityConfig {
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
                 .requestMatchers(HttpMethod.POST, "/auth/login")  // Allow POST requests for login
-                .requestMatchers(HttpMethod.POST, "/auth/signup") // Allow POST requests for signup
+                .requestMatchers(HttpMethod.POST, "/auth/signup")
+                //.requestMatchers(HttpMethod.POST, "/api/posts")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
                         "/**/*.html", "/**/*.css", "/**/*.js");
     }
