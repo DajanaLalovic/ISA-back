@@ -1,4 +1,9 @@
 package com.isa.OnlyBuns.iservice;
 
-public class IPostService {
+import com.isa.OnlyBuns.dto.PostDTO;
+import com.isa.OnlyBuns.model.Post;
+
+public interface IPostService {
+    void remove(Integer id);
+    void deleteLogically(Integer id);
 }

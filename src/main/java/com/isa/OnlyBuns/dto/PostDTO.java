@@ -14,16 +14,17 @@ public class PostDTO {
     private double longitude;
     private LocalDateTime createdAt;
     private Integer userId;
+    private boolean isRemoved;
 
     public PostDTO() {
     }
 
     public PostDTO(Post post) {
-        this(post.getId(), post.getDescription(), post.getImagePath(), post.getLatitude(),post.getLongitude(),post.getCreatedAt(), post.getUserId());
+        this(post.getId(), post.getDescription(), post.getImagePath(), post.getLatitude(),post.getLongitude(),post.getCreatedAt(), post.getUserId(),post.getIsRemoved());
     }
 
 
-    public PostDTO(Integer id, String description,String imagePath, double latitude, double longitude, LocalDateTime createdAt, Integer userId) {
+    public PostDTO(Integer id, String description,String imagePath, double latitude, double longitude, LocalDateTime createdAt, Integer userId,boolean isRemoved) {
         this.id = id;
         this.description = description;
         this.latitude = latitude;
@@ -31,6 +32,7 @@ public class PostDTO {
         this.longitude = longitude;
         this.createdAt = createdAt;
         this.userId = userId;
+        this.isRemoved = isRemoved;
     }
 
     public Integer getId() {
@@ -61,4 +63,5 @@ public class PostDTO {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+    public boolean getIsRemoved() {return isRemoved;}
 }

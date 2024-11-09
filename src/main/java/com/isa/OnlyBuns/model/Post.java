@@ -29,6 +29,9 @@ public class Post {
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
+    @Column(name = "is_removed")
+    private Boolean isRemoved;
+
     public Post() {
     }
 
@@ -38,7 +41,8 @@ public class Post {
                 double latitude,
                 double longitude,
                 LocalDateTime createdAt,
-                Integer userId) {
+                Integer userId,
+                boolean isRemoved) {
 
         this.id = id;
         this.description = description;
@@ -47,6 +51,7 @@ public class Post {
         this.longitude = longitude;
         this.createdAt = createdAt;
         this.userId = userId;
+        this.isRemoved = isRemoved;
     }
 
     public Integer getId() {
@@ -76,6 +81,9 @@ public class Post {
     public Integer getUserId() {
         return userId;
     }
+    public boolean getIsRemoved() {return isRemoved;}
+
+    public void setId(Integer id) {this.id=id;}
 
     public void setDescription(String description) {
         this.description = description;
@@ -100,6 +108,7 @@ public class Post {
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
+    public void setIsRemoved (boolean isRemoved) {this.isRemoved = isRemoved;}
 
     @Override
     public String toString() {
@@ -111,6 +120,7 @@ public class Post {
                 ", longitude=" + longitude +
                 ", createdAt=" + createdAt +
                 ", userId=" + userId +
+                ", isRemoved=" + isRemoved +
                 '}';
     }
 }
