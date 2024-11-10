@@ -3,6 +3,7 @@ package com.isa.OnlyBuns.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,14 +33,16 @@ public class Post {
 
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "post_likes")
     @Column(name = "user_id")
-    private List<Integer> likes;
+    private List<Integer> likes= new ArrayList<>();
 
     public Post() {
+        this.comments = new ArrayList<>();
+        this.likes = new ArrayList<>();
     }
 
     public Post(Integer id,

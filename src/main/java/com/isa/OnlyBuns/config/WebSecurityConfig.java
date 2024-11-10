@@ -21,6 +21,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -55,19 +57,20 @@ public class WebSecurityConfig {
     @Autowired
     private TokenUtils tokenUtils;
 
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        http.cors() // Dodaj ovo kako bi se omogućio CORS
+                .and()
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(restAuthenticationEntryPoint))
                 .authorizeHttpRequests((requests) -> requests
-                        // Allow unauthenticated access to signup and login endpoints
-                        .requestMatchers("/auth/**").permitAll() // Allow access to all /auth/** endpoints
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll() // Ensure POST /auth/login is open
-                        .anyRequest().authenticated()  // Other requests need to be authenticated
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .anyRequest().authenticated()  // Ostali zahtevi moraju biti autentifikovani
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService()), BasicAuthenticationFilter.class)
-                .csrf(csrf -> csrf.disable())
                 .authenticationProvider(authenticationProvider());
 
         return http.build();
@@ -78,7 +81,7 @@ public class WebSecurityConfig {
         return (web) -> web.ignoring()
                 .requestMatchers(HttpMethod.POST, "/auth/login")  // Allow POST requests for login
                 .requestMatchers(HttpMethod.POST, "/auth/signup")
-                .requestMatchers(HttpMethod.POST, "/api/posts")// Allow POST requests for signup
+                //.requestMatchers(HttpMethod.POST, "/api/posts")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
                         "/**/*.html", "/**/*.css", "/**/*.js");
     }

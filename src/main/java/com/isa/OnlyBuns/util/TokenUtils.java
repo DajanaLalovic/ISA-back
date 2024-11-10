@@ -216,7 +216,7 @@ public class TokenUtils {
         Claims claims;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(SECRET)
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
         } catch (ExpiredJwtException ex) {
