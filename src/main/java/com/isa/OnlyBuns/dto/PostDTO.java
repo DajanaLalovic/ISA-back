@@ -17,6 +17,7 @@ public class PostDTO {
     private long userId;
     private List<CommentDTO> comments;
     private List<Integer> likes;
+    private String imageBase64;
     private boolean isRemoved;
 
     public PostDTO() {
@@ -86,5 +87,13 @@ public class PostDTO {
 
     public void setLikes(List<Integer> likes) {
         this.likes = likes;
+    }
+
+    public String getImageBase64() {
+        return imageBase64;
+    }
+
+    public void setImageBase64(String imageBase64) {
+        this.imageBase64 = imageBase64;
     }
 }

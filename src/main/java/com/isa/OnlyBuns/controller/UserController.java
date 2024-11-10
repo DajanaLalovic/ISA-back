@@ -25,7 +25,7 @@ import com.isa.OnlyBuns.iservice.IUserService;
 // Primer kontrolera cijim metodama mogu pristupiti samo autorizovani korisnici
 @RestController
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
-@CrossOrigin
+
 public class UserController {
 
 
