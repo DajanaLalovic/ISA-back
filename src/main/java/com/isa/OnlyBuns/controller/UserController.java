@@ -63,4 +63,9 @@ public class UserController {
         fooObj.put("foo", "bar");
         return fooObj;
     }
+    @GetMapping("/getOneUser/{id}")
+    public User loadOneById(@PathVariable Long id) {
+        return this.userService.findById(id);
+    }
+
 }
