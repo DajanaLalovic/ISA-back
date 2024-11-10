@@ -63,13 +63,16 @@ public class PostController {
 //        return new ResponseEntity<>(updatedPostDTO, HttpStatus.OK);
 //    }
 @PutMapping(consumes = "application/json")
-public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO) {
+public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO,@RequestParam Integer currentUserId) {
 
 //dodaj mozda id-za post
    Post post = postService.findOne(postDTO.getId());
 
     if (post == null) {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    if (post.getUserId()!=currentUserId) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     post.setId(postDTO.getId());
@@ -87,10 +90,13 @@ public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO) {
     return new ResponseEntity<>(new PostDTO(post), HttpStatus.OK);
 }
 @DeleteMapping(value = "/{id}",consumes = "application/json")
-public ResponseEntity<Void> deletePost(@PathVariable Integer id) {
+public ResponseEntity<Void> deletePost(@PathVariable Integer id,@RequestParam Integer currentUserId) {
         Post post = postService.findOne(id);
 
         if (post != null) {
+            if (post.getUserId() != currentUserId.longValue()) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
             postService.remove(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
@@ -98,13 +104,34 @@ public ResponseEntity<Void> deletePost(@PathVariable Integer id) {
         }
     }
     @PutMapping(value = "/deleteLogically/{id}")
-    public ResponseEntity<Void> deleteLogically(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteLogically(@PathVariable Integer id,@RequestParam Integer currentUserId) {
         Post post = postService.findOne(id);
 
         if (post != null) {
+            if (post.getUserId() != currentUserId.longValue()) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
             postService.deleteLogically(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    //porbaj psole preko tokena da uzme skorinsika:
+    /*
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Integer userId = (Integer) authentication.getPrincipal(); // ili dobijete korisnika i pročitate userId
+
+    // Nastavite sa logikom za ažuriranje posta koristeći `userId`
+    if (!post.getUserId().equals(userId)) {
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN)
+     */
+    @PutMapping("/like/{postId}")
+    public ResponseEntity<PostDTO> likePost(@PathVariable Integer postId, @RequestParam Integer userId) {
+        try {
+            Post likedPost = postService.likePost(postId, userId);
+            return new ResponseEntity<>(new PostDTO(likedPost), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

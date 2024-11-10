@@ -54,6 +54,20 @@ public class PostService {
             postRepository.save(post);
         }
     }
+    public Post likePost(Integer postId, Integer userId) {
+        Post post = postRepository.findById(postId).orElse(null);
+        if (post == null) {
+            throw new IllegalArgumentException("Post not found");
+        }
+        //da ne sme user dva put isto lajkovati
+        if (!post.getLikes().contains(userId)) {
+            post.getLikes().add(userId);
+            postRepository.save(post);
+        }
+
+        return post;
+    }
+
 
 
 
