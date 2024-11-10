@@ -25,7 +25,7 @@ import com.isa.OnlyBuns.iservice.IUserService;
 // Primer kontrolera cijim metodama mogu pristupiti samo autorizovani korisnici
 @RestController
 @RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
-@CrossOrigin
+
 public class UserController {
 
 
@@ -39,10 +39,14 @@ public class UserController {
     // Ukoliko nema, server ce vratiti gresku 403 Forbidden
     // Korisnik jeste autentifikovan, ali nije autorizovan da pristupi resursu
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
 
     public User loadById(@PathVariable Long userId) {
         return this.userService.findById(userId);
+    }
+    @GetMapping("/profile/{userId}")
+    public User loadByIdProfile(@PathVariable Long userId) {
+        return this.userService.findById1(userId);
     }
 
     @GetMapping("/user/all")

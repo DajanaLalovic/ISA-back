@@ -2,12 +2,12 @@ package com.isa.OnlyBuns.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
+import com.isa.OnlyBuns.enums.UserRole;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "USERS")
@@ -28,7 +28,7 @@ public class User implements UserDetails, Serializable {
     // @Column(nullable = false)
     // private String address;
 
-    @Column(name= "email", nullable = false, unique = true)
+    @Column(name= "email", nullable = false)
     private String email;
 
     @Column(nullable = false, unique = true)
@@ -40,11 +40,31 @@ public class User implements UserDetails, Serializable {
     @Column(nullable = false)
     private Boolean active = false;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @Column(name = "activation_token")
+    private String activationToken;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private UserRole role;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
+
+
+
+
+   /* @Column(name = "roles")
+    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<UserRole> roles;*/
+
+    /*@ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private List<Role> roles;
+    private List<Role> roles;*/
 
     public User() {}
 
@@ -109,20 +129,42 @@ public class User implements UserDetails, Serializable {
     public void setIsActive(Boolean active) {
         this.active = active;
     }
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+
+    public String getActivationToken() {
+        return activationToken;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public void setActivationToken(String activationToken) {
+        this.activationToken = activationToken;
     }
 
-    @JsonIgnore
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+    /*@JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles;
     }
+*/
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
+    }
 
     @Override
     public boolean equals(Object o) {
