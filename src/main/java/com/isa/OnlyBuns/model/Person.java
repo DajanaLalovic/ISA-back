@@ -11,7 +11,7 @@ import java.util.Objects;
 @Table(name = "person")
 public class Person implements Serializable {
 
-   // private static final long serialVersionUID = 1L;
+    // private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +20,8 @@ public class Person implements Serializable {
     @Column(name= "name", nullable = false)
     private String name;
 
-   // @Column(nullable = false)
-   // private String address;
+    // @Column(nullable = false)
+    // private String address;
 
     @Column(name= "email", nullable = false, unique = true)
     private String email;
@@ -31,7 +31,7 @@ public class Person implements Serializable {
     public Person(String name, String email) {
         super();
         this.name = name;
-       // this.address = address;
+        // this.address = address;
         this.email = email;
     }
 
@@ -93,7 +93,7 @@ public class Person implements Serializable {
         return "Person{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-               // ", address='" + address + '\'' +
+                // ", address='" + address + '\'' +
                 ", email='" + email + '\'' +
                 '}';
     }

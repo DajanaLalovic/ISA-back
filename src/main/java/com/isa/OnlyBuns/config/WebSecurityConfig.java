@@ -80,6 +80,12 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/auth/signup")
                 .requestMatchers(HttpMethod.GET, "/auth/activate")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "/api/profile/**")
+                .requestMatchers(HttpMethod.POST, "/api/posts")
+                .requestMatchers(HttpMethod.PUT, "/api/posts")
+                .requestMatchers(HttpMethod.DELETE, "/api/posts/{id}")
+                .requestMatchers(HttpMethod.PUT, "/api/posts/deleteLogically/{id}")
+                .requestMatchers(HttpMethod.GET, "/api/posts/all")// Allow POST requests for signup
+                .requestMatchers(HttpMethod.GET, "/api/posts/onePost/{id}")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
                         "/**/*.html", "/**/*.css", "/**/*.js");
     }
