@@ -10,4 +10,8 @@ public interface IUserService {
     User findByUsername(String username);
     List<User> findAll ();
     User save(UserDTO userDTO);
+    User convertToUser(UserDTO userDTO);
+    UserDTO convertToDTO(User user);
+    User findByActivationToken(String activationToken);
+    void updateUser(User user);
 }

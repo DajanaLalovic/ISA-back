@@ -10,7 +10,7 @@ public class UserDTO {
     private String password;
     private Boolean active;
     private String email;
-
+    private String activationToken;
 
 
     public UserDTO() {}
@@ -80,6 +80,12 @@ public class UserDTO {
         this.active = active;
     }
 
+    public String getActivationToken() {
+        return activationToken;
+    }
 
+    public void setActivationToken(String activationToken) {
+        this.activationToken = activationToken;
+    }
 }
 

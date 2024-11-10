@@ -39,9 +39,13 @@ public class UserController {
     // Ukoliko nema, server ce vratiti gresku 403 Forbidden
     // Korisnik jeste autentifikovan, ali nije autorizovan da pristupi resursu
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
 
     public User loadById(@PathVariable Long userId) {
+        return this.userService.findById(userId);
+    }
+    @GetMapping("/profile/{userId}")
+    public User loadByIdProfile(@PathVariable Long userId) {
         return this.userService.findById(userId);
     }
 
