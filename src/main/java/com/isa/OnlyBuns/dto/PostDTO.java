@@ -18,16 +18,17 @@ public class PostDTO {
     private List<CommentDTO> comments;
     private List<Integer> likes;
     private String imageBase64;
+    private boolean isRemoved;
 
     public PostDTO() {
     }
 
     public PostDTO(Post post) {
-        this(post.getId(), post.getDescription(), post.getImagePath(), post.getLatitude(),post.getLongitude(),post.getCreatedAt(), post.getUserId() ,null, null);
+        this(post.getId(), post.getDescription(), post.getImagePath(), post.getLatitude(),post.getLongitude(),post.getCreatedAt(), post.getUserId(),post.getIsRemoved(),null,null);
     }
 
 
-    public PostDTO(Integer id, String description,String imagePath, double latitude, double longitude, LocalDateTime createdAt, long userId, List<CommentDTO> comments, List<Integer> likes) {
+    public PostDTO(Integer id, String description,String imagePath, double latitude, double longitude, LocalDateTime createdAt, long userId,boolean isRemoved,List<CommentDTO> comments,List<Integer> likes) {
         this.id = id;
         this.description = description;
         this.latitude = latitude;
@@ -35,6 +36,7 @@ public class PostDTO {
         this.longitude = longitude;
         this.createdAt = createdAt;
         this.userId = userId;
+        this.isRemoved = isRemoved;
         this.comments = comments;
         this.likes = likes;
     }
@@ -66,6 +68,10 @@ public class PostDTO {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean getIsRemoved() {
+        return isRemoved;
     }
     public List<CommentDTO> getComments() {
         return comments;

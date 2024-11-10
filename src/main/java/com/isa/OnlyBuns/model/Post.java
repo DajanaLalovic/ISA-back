@@ -40,6 +40,9 @@ public class Post {
     @Column(name = "user_id")
     private List<Integer> likes= new ArrayList<>();
 
+    @Column(name = "is_removed")
+    private Boolean isRemoved;
+
     public Post() {
         this.comments = new ArrayList<>();
         this.likes = new ArrayList<>();
@@ -51,8 +54,11 @@ public class Post {
                 double latitude,
                 double longitude,
                 LocalDateTime createdAt,
-                long userId,List<Comment> comments,
-                List<Integer> likes) {
+                long userId,
+                List<Comment> comments,
+                List<Integer> likes,
+                boolean isRemoved) {
+
 
         this.id = id;
         this.description = description;
@@ -63,6 +69,8 @@ public class Post {
         this.userId = userId;
         this.comments = comments;
         this.likes = likes;
+        this.isRemoved = isRemoved;
+
     }
 
     public Integer getId() {
@@ -92,6 +100,9 @@ public class Post {
     public long getUserId() {
         return userId;
     }
+    public boolean getIsRemoved() {return isRemoved;}
+
+    public void setId(Integer id) {this.id=id;}
 
     public void setDescription(String description) {
         this.description = description;
@@ -116,6 +127,7 @@ public class Post {
     public void setUserId(long userId) {
         this.userId = userId;
     }
+    public void setIsRemoved (boolean isRemoved) {this.isRemoved = isRemoved;}
     public List<Comment> getComments() {
         return comments;
     }
@@ -142,6 +154,7 @@ public class Post {
                 ", longitude=" + longitude +
                 ", createdAt=" + createdAt +
                 ", userId=" + userId +
+                ", isRemoved=" + isRemoved +
                 ", comments=" + comments +
                 ", likes=" + likes +
                 '}';

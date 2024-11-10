@@ -1,5 +1,4 @@
 package com.isa.OnlyBuns.config;
-
 import com.isa.OnlyBuns.security.auth.RestAuthenticationEntryPoint;
 import com.isa.OnlyBuns.security.auth.TokenAuthenticationFilter;
 import com.isa.OnlyBuns.service.CustomUserDetailsService;
@@ -81,7 +80,9 @@ public class WebSecurityConfig {
         return (web) -> web.ignoring()
                 .requestMatchers(HttpMethod.POST, "/auth/login")  // Allow POST requests for login
                 .requestMatchers(HttpMethod.POST, "/auth/signup")
-                //.requestMatchers(HttpMethod.POST, "/api/posts")// Allow POST requests for signup
+                .requestMatchers(HttpMethod.GET, "/auth/activate")// Allow POST requests for signup
+                .requestMatchers(HttpMethod.GET, "/api/profile/**")
+                .requestMatchers(HttpMethod.GET, "/api/posts/all")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
                         "/**/*.html", "/**/*.css", "/**/*.js");
     }
