@@ -66,7 +66,7 @@ public class PostController {
             } else {
                 post.setImagePath(postDTO.getImagePath());
             }
-
+            post.setIsRemoved(false);
             post.setComments(new ArrayList<>());
             post.setLikes(new ArrayList<>());
 
