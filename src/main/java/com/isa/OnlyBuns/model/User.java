@@ -47,7 +47,9 @@ public class User implements UserDetails, Serializable {
     @Column(name = "role")
     private UserRole role;
 
-    // Getteri i setteri
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
 
 
 
@@ -143,6 +145,14 @@ public class User implements UserDetails, Serializable {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
     /*@JsonIgnore
     @Override

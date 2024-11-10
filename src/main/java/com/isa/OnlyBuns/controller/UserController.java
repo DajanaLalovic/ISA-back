@@ -46,7 +46,7 @@ public class UserController {
     }
     @GetMapping("/profile/{userId}")
     public User loadByIdProfile(@PathVariable Long userId) {
-        return this.userService.findById(userId);
+        return this.userService.findById1(userId);
     }
 
     @GetMapping("/user/all")

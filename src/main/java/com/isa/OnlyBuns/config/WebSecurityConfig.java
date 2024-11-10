@@ -79,7 +79,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/auth/login")  // Allow POST requests for login
                 .requestMatchers(HttpMethod.POST, "/auth/signup")
                 .requestMatchers(HttpMethod.GET, "/auth/activate")// Allow POST requests for signup
-                .requestMatchers(HttpMethod.GET, "/person/{userId}")
+                .requestMatchers(HttpMethod.GET, "/api/profile/**")
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
                         "/**/*.html", "/**/*.css", "/**/*.js");
     }

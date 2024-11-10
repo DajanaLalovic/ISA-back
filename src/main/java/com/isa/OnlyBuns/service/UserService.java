@@ -6,6 +6,7 @@ import com.isa.OnlyBuns.enums.UserRole;
 import com.isa.OnlyBuns.irepository.IUserRepository;
 import com.isa.OnlyBuns.iservice.IRoleService;
 import com.isa.OnlyBuns.iservice.IUserService;
+import com.isa.OnlyBuns.model.Address;
 import com.isa.OnlyBuns.model.Role;
 import com.isa.OnlyBuns.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,10 @@ public class UserService implements IUserService {
         return userRepository.findById(id).orElseGet(null);
     }
 
+    public User findById1(Long id) throws AccessDeniedException {
+        return userRepository.findById(id).orElse(null);
+    }
+
     public List<User> findAll() throws AccessDeniedException {
         return userRepository.findAll();
     }
@@ -72,6 +77,14 @@ public class UserService implements IUserService {
         u.setRoles(new HashSet<>(Arrays.asList(UserRole.USER)));
 
         }*/
+        Address address = new Address();
+        address.setStreet(userRequest.getStreet());
+        address.setNumber(userRequest.getNumber());
+        address.setCity(userRequest.getCity());
+        address.setPostalCode(userRequest.getPostalCode());
+        address.setCountry(userRequest.getCountry());
+
+        u.setAddress(address);
 
         return this.userRepository.save(u);
     }

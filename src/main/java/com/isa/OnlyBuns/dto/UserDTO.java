@@ -11,7 +11,11 @@ public class UserDTO {
     private Boolean active;
     private String email;
     private String activationToken;
-
+    private String street;
+    private String number;
+    private String city;
+    private String postalCode;
+    private String country;
 
     public UserDTO() {}
 
@@ -19,12 +23,24 @@ public class UserDTO {
         this.id = user.getId();
         this.username = user.getUsername();
         this.active = user.getIsActive();
+        if (user.getAddress() != null) {
+            this.street = user.getAddress().getStreet();
+            this.number = user.getAddress().getNumber();
+            this.city = user.getAddress().getCity();
+            this.postalCode = user.getAddress().getPostalCode();
+            this.country = user.getAddress().getCountry();
+        }
     }
 
-    public UserDTO(Long id, String username, Boolean active) {
+    public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country) {
         this.id = id;
         this.username = username;
         this.active = active;
+        this.street = street;
+        this.number = number;
+        this.city = city;
+        this.postalCode = postalCode;
+        this.country = country;
     }
 
     public Long getId() {
@@ -86,6 +102,45 @@ public class UserDTO {
 
     public void setActivationToken(String activationToken) {
         this.activationToken = activationToken;
+    }
+    public String getStreet() {
+        return street;
+    }
+
+    public void setStreet(String street) {
+        this.street = street;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 }
 
