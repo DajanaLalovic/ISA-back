@@ -86,6 +86,6 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/profile/**")
                 .requestMatchers(HttpMethod.GET, "/api/posts/all")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
-                        "/**/*.html", "/**/*.css", "/**/*.js");
+                        "/**.html", "/**.css", "/**.js");
     }
 }

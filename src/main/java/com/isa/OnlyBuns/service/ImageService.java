@@ -2,7 +2,7 @@ package com.isa.OnlyBuns.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
+import net.coobird.thumbnailator.Thumbnails;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -42,60 +42,51 @@ public class ImageService
         throw new IllegalArgumentException("No picture data");
 }
 
-   @Scheduled(cron = "0 0 0 * * ?") // Pokreće se svakog dana u ponoć
-   //@Scheduled(cron = "0 * * * * ?")
-    public void compressOldImages() {
-       logger.info("Zadatak za kompresiju slika je pokrenut.");
+   // @Scheduled(cron = "0 * * * * *") // Pokreće se svakog minuta za testiranje
+    @Scheduled(cron = "0 0 0 * * *")  // Pokreće se svakog dana u ponoć
+    public void compressOldImages() throws IOException {
         Path imagesPath = Paths.get(uploadDir, "images");
+
         if (Files.exists(imagesPath)) {
-            try {
-                Files.walk(imagesPath)
-                        .filter(Files::isRegularFile)
-                        .filter(this::isOlderThanOneMonth)
-                        .filter(path -> !isAlreadyCompressed(path))
-                        .forEach(this::compressImage);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    private boolean isAlreadyCompressed(Path path) {
-        String compressedFileName = path.toString().replace(".png", "_compressed.jpg");
-        boolean exists = Files.exists(Paths.get(compressedFileName));
-        logger.info("Provera da li je slika već kompresovana: " + compressedFileName + " - Postoji: " + exists);
-        return exists;
-    }
-
-    private boolean isOlderThanOneMonth(Path path) {
-        try {
-            FileTime fileTime = Files.getLastModifiedTime(path);
-            LocalDateTime fileDate = fileTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            boolean isOlder = fileDate.isBefore(LocalDateTime.now().minusMonths(1));
-            logger.info("Provera starosti fajla: " + path.toString() + " - Stariji od mesec dana: " + isOlder);
-            return isOlder;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+            Files.walk(imagesPath)
+                    .filter(Files::isRegularFile)
+                    .forEach(filePath -> {
+                        try {
+                            if (isOlderThanOneMonth(filePath) && !isAlreadyCompressed(filePath)) {
+                                compressImage(filePath);
+                            }
+                        } catch (IOException e) {
+                            logger.error("Greška prilikom kompresije slike: " + filePath.toString(), e);
+                        }
+                    });
+        } else {
+            logger.warn("Direktorijum za slike ne postoji: " + imagesPath);
         }
     }
 
-    private void compressImage(Path path) {
-        try {
-            BufferedImage image = ImageIO.read(path.toFile());
-            if (image != null) {
+    private boolean isOlderThanOneMonth(Path filePath) throws IOException {
+        FileTime fileTime = Files.getLastModifiedTime(filePath);
+        LocalDateTime fileDate = fileTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        boolean isOlder = fileDate.isBefore(LocalDateTime.now().minusMonths(1)); // Proverava starost od mesec dana
+        logger.info("Provera starosti fajla: " + filePath.toString() + " - Stariji od mesec dana: " + isOlder);
+        return isOlder;
+    }
 
-                String compressedFileName = path.toString().replace(".png", "_compressed.jpg");
-                File output = new File(compressedFileName);
+    private boolean isAlreadyCompressed(Path filePath) {
+        String fileName = filePath.toFile().getName();
+        return fileName.contains("_compressed");
+    }
 
-                // Snima kompresovanu verziju slike kao novi fajl
-                ImageIO.write(image, "jpg", output);
-                logger.info("Kompresovana slika sačuvana: " + compressedFileName);
-            } else {
-                logger.warn("Slika nije mogla biti učitana: " + path.toString());
-            }
-        } catch (IOException e) {
-            logger.error("Greška prilikom kompresije slike: " + path.toString(), e);
-        }
+    private void compressImage(Path filePath) throws IOException {
+        File file = filePath.toFile();
+        String compressedFileName = filePath.toString().replace(".png", "_compressed.jpg");
+
+        Thumbnails.of(file)
+                .scale(1.0)
+                .outputQuality(0.3)
+                .toFile(compressedFileName);
+
+        logger.info("Kompresovana slika sačuvana: " + compressedFileName);
     }
 
 }
