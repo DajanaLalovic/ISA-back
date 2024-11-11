@@ -38,6 +38,7 @@ public class PostController {
         List<PostDTO> postsDTO=new ArrayList<>();
         for(Post p:posts){
             postsDTO.add(new PostDTO(p));
+            System.out.println("Image path for post " + p.getId() + ": " + p.getImagePath());
         }
         return new ResponseEntity<>(postsDTO, HttpStatus.OK);
     }
@@ -91,78 +92,113 @@ public class PostController {
 //        return new ResponseEntity<>(updatedPostDTO, HttpStatus.OK);
 //    }
 @PutMapping(consumes = "application/json")
-public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO,@RequestParam Integer currentUserId) {
+@PreAuthorize("isAuthenticated()")
+public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO, Principal principal) throws IOException {
+    User currentUser = userService.findByUsername(principal.getName());
+    if (currentUser == null) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 
-//dodaj mozda id-za post
-   Post post = postService.findOne(postDTO.getId());
-
+    Post post = postService.findOne(postDTO.getId());
     if (post == null) {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-    if (post.getUserId()!=currentUserId) {
+
+    if (post.getUserId()!=currentUser.getId()) {
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
-    post.setId(postDTO.getId());
+    // Ažuriraj polja opisa, latitude i longitude
     post.setDescription(postDTO.getDescription());
     post.setLatitude(postDTO.getLatitude());
     post.setLongitude(postDTO.getLongitude());
     post.setCreatedAt(postDTO.getCreatedAt());
-    post.setUserId(postDTO.getUserId());
-    post.setImagePath(postDTO.getImagePath());
-    post.setIsRemoved(postDTO.getIsRemoved());
-    post.setComments(new ArrayList<>());
-    post.setLikes(new ArrayList<>());
 
+    // Proveri da li korisnik želi da zadrži staru sliku ili je uploadovao novu
+    if (postDTO.getImageBase64() != null && !postDTO.getImageBase64().isEmpty()) {
+        String imageUrl = imageService.saveImage(postDTO.getImageBase64());
+        post.setImagePath(imageUrl);
+    }
+    // Ako je `imageBase64` prazan, koristi postojeći `imagePath`
+    // Bez promene putanje do slike
+
+    post.setIsRemoved(postDTO.getIsRemoved());
     post = postService.save(post);
+
     return new ResponseEntity<>(new PostDTO(post), HttpStatus.OK);
 }
-@DeleteMapping(value = "/{id}",consumes = "application/json")
-public ResponseEntity<Void> deletePost(@PathVariable Integer id,@RequestParam Integer currentUserId) {
-        Post post = postService.findOne(id);
 
-        if (post != null) {
-            if (post.getUserId() != currentUserId.longValue()) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-            postService.remove(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")  // Pristup dozvoljen samo autentifikovanim korisnicima
+    public ResponseEntity<Void> deletePost(@PathVariable Integer id, Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName());
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Post post = postService.findOne(id);
+        if (post == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-    }
-    @PutMapping(value = "/deleteLogically/{id}")
-    public ResponseEntity<Void> deleteLogically(@PathVariable Integer id,@RequestParam Integer currentUserId) {
-        Post post = postService.findOne(id);
 
-        if (post != null) {
-            if (post.getUserId() != currentUserId.longValue()) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-            postService.deleteLogically(id);
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
+        if (post.getUserId()!=currentUser.getId()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        postService.remove(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/deleteLogically/{id}")
+    @PreAuthorize("isAuthenticated()")  // Pristup dozvoljen samo autentifikovanim korisnicima
+    public ResponseEntity<Void> deleteLogically(@PathVariable Integer id, Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName());
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Post post = postService.findOne(id);
+        if (post == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-    }
-    //porbaj psole preko tokena da uzme skorinsika:
-    /*
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    Integer userId = (Integer) authentication.getPrincipal(); // ili dobijete korisnika i pročitate userId
 
-    // Nastavite sa logikom za ažuriranje posta koristeći `userId`
-    if (!post.getUserId().equals(userId)) {
-        return new ResponseEntity<>(HttpStatus.FORBIDDEN)
-     */
+        if (post.getUserId()!=currentUser.getId()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        postService.deleteLogically(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PutMapping("/like/{postId}")
-    public ResponseEntity<PostDTO> likePost(@PathVariable Integer postId, @RequestParam Integer userId) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PostDTO> likePost(@PathVariable Integer postId, Principal principal) {
         try {
-            Post likedPost = postService.likePost(postId, userId);
+            // Prvo pronađi korisnika na osnovu username iz tokena
+            User currentUser = userService.findByUsername(principal.getName());
+            if (currentUser == null) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
+
+            // Pozovi postService sa ID korisnika iz tokena
+            Post likedPost = postService.likePost(postId, currentUser.getId().intValue());
             return new ResponseEntity<>(new PostDTO(likedPost), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+    @GetMapping("/likesCount/{postId}")
+    public ResponseEntity<Integer> getLikesCount(@PathVariable Integer postId) {
+        try {
+            int likesCount = postService.getLikesCount(postId);
+            return new ResponseEntity<>(likesCount, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
 }
 
 

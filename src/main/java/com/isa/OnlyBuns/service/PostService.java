@@ -72,6 +72,12 @@ public class PostService {
 
         return post;
     }
+    public int getLikesCount(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        return post.getLikes().size();
+    }
+
 
 
 

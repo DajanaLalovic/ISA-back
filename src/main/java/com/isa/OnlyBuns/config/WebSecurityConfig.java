@@ -32,6 +32,7 @@ public class WebSecurityConfig {
         return new CustomUserDetailsService();
     }
 
+
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -59,15 +60,17 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors() // Dodaj ovo kako bi se omogućio CORS
+        http.cors()
                 .and()
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(restAuthenticationEntryPoint))
                 .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers(HttpMethod.GET, "/images/**").permitAll() // Dopuštamo pristup slikama
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/getOneUser/**").permitAll()
+                        .anyRequest().authenticated() // Sve ostale zahteve traži autentifikacija
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService()), BasicAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider());
@@ -75,14 +78,18 @@ public class WebSecurityConfig {
         return http.build();
     }
 
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
+                .requestMatchers(HttpMethod.GET, "/images/**") // Dopuštamo pristup slikama
+                .requestMatchers(HttpMethod.GET, "/api/posts/likesCount/**")
                 .requestMatchers(HttpMethod.POST, "/auth/login")
                 .requestMatchers(HttpMethod.POST, "/auth/signup")
                 .requestMatchers(HttpMethod.GET, "/auth/activate")
                 .requestMatchers(HttpMethod.GET, "/api/profile/**")
                 .requestMatchers(HttpMethod.GET, "/api/posts/all")
+                .requestMatchers(HttpMethod.GET, "/api/getOneUser/{id}")
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
                         "/**/*.html", "/**/*.css", "/**/*.js");
     }

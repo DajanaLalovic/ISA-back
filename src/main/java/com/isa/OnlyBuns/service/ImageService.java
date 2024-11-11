@@ -29,5 +29,6 @@ public class ImageService
             return "images/" + fileName;
         }
         throw new IllegalArgumentException("No picture data");
-}}
+}
+}
 
