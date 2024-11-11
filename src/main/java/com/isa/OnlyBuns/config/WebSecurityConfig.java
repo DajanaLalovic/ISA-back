@@ -22,6 +22,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import java.util.List;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -60,9 +62,10 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors()
-                .and()
+
+        http
                 .csrf(csrf -> csrf.disable())
+                .cors(withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint(restAuthenticationEntryPoint))
                 .authorizeHttpRequests((requests) -> requests
@@ -88,9 +91,11 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/auth/signup")
                 .requestMatchers(HttpMethod.GET, "/auth/activate")
                 .requestMatchers(HttpMethod.GET, "/api/profile/**")
-                .requestMatchers(HttpMethod.GET, "/api/posts/all")
                 .requestMatchers(HttpMethod.GET, "/api/getOneUser/{id}")
+                .requestMatchers(HttpMethod.GET, "/api/posts/all")// Allow POST requests for signup
+                .requestMatchers(HttpMethod.GET, "api/getOneUser/{id}")
+
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
-                        "/**/*.html", "/**/*.css", "/**/*.js");
+                        "/**.html", "/**.css", "/**.js");
     }
 }

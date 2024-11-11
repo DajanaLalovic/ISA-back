@@ -72,4 +72,13 @@ public class UserController {
         return this.userService.findById(id);
     }
 
+    @GetMapping("/user-by-username/{username}")
+    @PreAuthorize("isAuthenticated()")
+    public User findByUsername(@PathVariable String username) {return this.userService.findByUsername(username);}
+
+    @GetMapping("/user-whoami")
+    @PreAuthorize("isAuthenticated()")
+    public User getCurrentUser(Principal principal) {
+        return userService.findByUsername(principal.getName());
+    }
 }
