@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.isa.OnlyBuns.model.Post;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -82,6 +83,34 @@ public class PostService implements IPostService {
         return postRepository.countByUserId(userId);
     }
 
+
+    public Post addNewPost(PostDTO postDTO, String username) throws IOException {
+        User currentUser = userRepository.findByUsername(username);
+        if (currentUser == null) {
+            throw new IllegalArgumentException("Korisnik nije autentifikovan");
+        }
+
+        Post post = new Post();
+        post.setDescription(postDTO.getDescription());
+        post.setLatitude(postDTO.getLatitude());
+        post.setLongitude(postDTO.getLongitude());
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUserId(currentUser.getId());
+
+        // Validacija i čuvanje slike ako je dostupna
+        if (postDTO.getImageBase64() != null && !postDTO.getImageBase64().isEmpty()) {
+            String imageUrl = imageService.saveImage(postDTO.getImageBase64());
+            post.setImagePath(imageUrl);
+        } else {
+            post.setImagePath(postDTO.getImagePath());
+        }
+
+        post.setIsRemoved(false);
+        post.setComments(new ArrayList<>());
+        post.setLikes(new ArrayList<>());
+
+        return postRepository.save(post);
+    }
 
 
 
