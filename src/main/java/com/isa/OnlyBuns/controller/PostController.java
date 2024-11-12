@@ -1,5 +1,4 @@
 package com.isa.OnlyBuns.controller;
-
 import com.isa.OnlyBuns.dto.PostDTO;
 import com.isa.OnlyBuns.model.Post;
 import com.isa.OnlyBuns.model.User;
@@ -12,10 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,37 +41,15 @@ public class PostController {
     }
 
     @PostMapping(consumes = "application/json")
-    @PreAuthorize("isAuthenticated()")  // Ova anotacija dozvoljava pristup samo autentifikovanim korisnicima
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostDTO> addNewPost(@RequestBody PostDTO postDTO, Principal principal) {
         try {
-            // Dohvati trenutno autentifikovanog korisnika iz konteksta
-            User currentUser = userService.findByUsername(principal.getName());
-            if (currentUser == null) {
-                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-            }
-
-            Post post = new Post();
-            post.setDescription(postDTO.getDescription());
-            post.setLatitude(postDTO.getLatitude());
-            post.setLongitude(postDTO.getLongitude());
-            post.setCreatedAt(LocalDateTime.now());
-            post.setUserId(currentUser.getId());  // Postavi ID trenutnog korisnika
-
-            // Proveri da li postoji imageBase64 i sačuvaj sliku
-            if (postDTO.getImageBase64() != null && !postDTO.getImageBase64().isEmpty()) {
-                String imageUrl = imageService.saveImage(postDTO.getImageBase64());
-                post.setImagePath(imageUrl);
-            } else {
-                post.setImagePath(postDTO.getImagePath());
-            }
-            post.setIsRemoved(false);
-            post.setComments(new ArrayList<>());
-            post.setLikes(new ArrayList<>());
-
-            Post savedPost = postService.save(post);
+            Post savedPost = postService.addNewPost(postDTO, principal.getName());
             return new ResponseEntity<>(new PostDTO(savedPost), HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
     }
 

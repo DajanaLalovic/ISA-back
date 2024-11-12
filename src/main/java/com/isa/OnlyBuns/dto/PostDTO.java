@@ -1,7 +1,5 @@
 package com.isa.OnlyBuns.dto;
-
 import com.isa.OnlyBuns.model.Post;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
