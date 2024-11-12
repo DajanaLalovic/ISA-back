@@ -8,4 +8,5 @@ public interface IPostService {
     void deleteLogically(Integer id);
     Post likePost(Integer postId, Integer userId);
     int getLikesCount(Integer postId);
+    Long countByUserId(Long userId);
 }

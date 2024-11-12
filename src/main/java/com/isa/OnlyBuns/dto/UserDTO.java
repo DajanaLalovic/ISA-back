@@ -16,8 +16,15 @@ public class UserDTO {
     private String city;
     private String postalCode;
     private String country;
+    private Long postCount;
+    private Long followingCount;
+    private String role; // Dodajte polje za ulogu korisnika
 
-    public UserDTO() {}
+
+    public UserDTO() {
+        this.postCount = 0L;
+        this.followingCount = 0L;
+    }
 
     public UserDTO(User user) {
         this.id = user.getId();
@@ -30,9 +37,13 @@ public class UserDTO {
             this.postalCode = user.getAddress().getPostalCode();
             this.country = user.getAddress().getCountry();
         }
+        this.postCount = user.getPostCount();
+        this.followingCount = user.getFollowingCount();
+        this.role = user.getRole().toString(); // Pretvorite `UserRole` u string
+
     }
 
-    public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country) {
+    public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country, Long postCount, Long followingCount) {
         this.id = id;
         this.username = username;
         this.active = active;
@@ -41,6 +52,8 @@ public class UserDTO {
         this.city = city;
         this.postalCode = postalCode;
         this.country = country;
+        this.postCount = postCount;
+        this.followingCount = followingCount;
     }
 
     public Long getId() {
@@ -142,5 +155,10 @@ public class UserDTO {
     public void setCountry(String country) {
         this.country = country;
     }
+    public Long getPostCount() {return postCount;}
+    public void setPostCount(Long postCount) {this.postCount = postCount;}
+
+    public Long getFollowingCount() {return followingCount;}
+    public void setFollowingCount(Long followingCount) {this.followingCount = followingCount;}
 }
 

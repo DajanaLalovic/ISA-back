@@ -2,6 +2,7 @@ package com.isa.OnlyBuns.service;
 import com.isa.OnlyBuns.dto.PostDTO;
 import com.isa.OnlyBuns.irepository.IPostRepository;
 import com.isa.OnlyBuns.irepository.IUserRepository;
+import com.isa.OnlyBuns.iservice.IPostService;
 import com.isa.OnlyBuns.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,7 @@ import java.util.List;
 
 
 @Service
-public class PostService {
+public class PostService implements IPostService {
 
     @Autowired
     private IPostRepository postRepository;
@@ -77,8 +78,9 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
         return post.getLikes().size();
     }
-
-
+    public Long countByUserId(Long userId) {
+        return postRepository.countByUserId(userId);
+    }
 
 
 

@@ -4,23 +4,29 @@ package com.isa.OnlyBuns.service;
 import com.isa.OnlyBuns.dto.UserDTO;
 import com.isa.OnlyBuns.enums.UserRole;
 import com.isa.OnlyBuns.irepository.IUserRepository;
+import com.isa.OnlyBuns.iservice.IPostService;
 import com.isa.OnlyBuns.iservice.IRoleService;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.model.Address;
 import com.isa.OnlyBuns.model.Role;
 import com.isa.OnlyBuns.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService {
     @Autowired
     private IUserRepository userRepository;
+    @Autowired
+    private IPostService postService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -121,6 +127,41 @@ public class UserService implements IUserService {
     }
     public void updateUser(User user) {
         userRepository.save(user);
+    }
+
+
+    public List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder) {
+        List<User> users = userRepository.findAll();
+
+        // Filtriranje korisnika
+        List<User> filteredUsers = users.stream()
+                .filter(user -> name == null || user.getName().toLowerCase().contains(name.toLowerCase()))
+                .filter(user -> surname == null || user.getSurname().toLowerCase().contains(surname.toLowerCase()))
+                .filter(user -> email == null || user.getEmail().toLowerCase().contains(email.toLowerCase()))
+                .filter(user -> {
+                    Long postCount = postService.countByUserId(user.getId());
+                    user.setPostCount(postCount);
+                    return (minPostCount == null || postCount >= minPostCount) &&
+                            (maxPostCount == null || postCount <= maxPostCount);
+                })
+                .collect(Collectors.toList());
+
+        // Sortiranje korisnika
+        if ("followingCount".equals(sortBy)) {
+            if ("desc".equals(sortOrder)) {
+                filteredUsers.sort(Comparator.comparing(User::getFollowingCount).reversed());
+            } else {
+                filteredUsers.sort(Comparator.comparing(User::getFollowingCount));
+            }
+        } else if ("email".equals(sortBy)) {
+            if ("desc".equals(sortOrder)) {
+                filteredUsers.sort(Comparator.comparing(User::getEmail).reversed());
+            } else {
+                filteredUsers.sort(Comparator.comparing(User::getEmail));
+            }
+        }
+
+        return filteredUsers;
     }
 
 }
