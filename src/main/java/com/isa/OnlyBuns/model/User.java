@@ -51,7 +51,11 @@ public class User implements UserDetails, Serializable {
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
+    @Column(name = "post_count", nullable = false)
+    private Long postCount;
 
+    @Column(name = "following_count", nullable = false)
+    private Long followingCount ;
 
 
    /* @Column(name = "roles")
@@ -66,7 +70,9 @@ public class User implements UserDetails, Serializable {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles;*/
 
-    public User() {}
+    public User() {
+        this.postCount = 0L;
+        this.followingCount = 0L;}
 
     public User( String username, String password) {
 
@@ -160,6 +166,11 @@ public class User implements UserDetails, Serializable {
         return this.roles;
     }
 */
+    public long getPostCount() {return postCount;}
+    public void setPostCount(Long postCount) {this.postCount = postCount; }
+
+    public long getFollowingCount() {return followingCount;}
+    public void setFollowingCount(Long followingCount) {this.followingCount = followingCount; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -187,7 +198,9 @@ public class User implements UserDetails, Serializable {
                 ", email='" + email + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", active=" + active +
+                ", active=" + active + '\''+
+                ", postCount=" + postCount +'\''+
+                ", followingCount=" + followingCount +'\''+
                 '}';
     }
 }

@@ -108,6 +108,8 @@ public class AuthenticationController {
 
         String activationToken = UUID.randomUUID().toString();
         userRequest.setActivationToken(activationToken);
+        userRequest.setPostCount(0L);
+        userRequest.setFollowingCount(0L);
         // Sačuvaj novog korisnika bez potrebe za prethodnom autentifikacijom
         User user = this.userService.save(userRequest);
 

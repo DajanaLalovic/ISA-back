@@ -15,4 +15,5 @@ public interface IUserService {
     UserDTO convertToDTO(User user);
     User findByActivationToken(String activationToken);
     void updateUser(User user);
+    List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder) ;
 }

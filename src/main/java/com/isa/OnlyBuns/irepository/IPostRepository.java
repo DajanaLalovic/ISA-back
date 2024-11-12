@@ -15,5 +15,6 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
 
     public List<Post> findPostByDescription(String description);
 
+    Long countByUserId(Long userId);
 
 }

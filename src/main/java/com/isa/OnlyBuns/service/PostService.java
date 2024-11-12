@@ -2,6 +2,7 @@ package com.isa.OnlyBuns.service;
 import com.isa.OnlyBuns.dto.PostDTO;
 import com.isa.OnlyBuns.irepository.IPostRepository;
 import com.isa.OnlyBuns.irepository.IUserRepository;
+import com.isa.OnlyBuns.iservice.IPostService;
 import com.isa.OnlyBuns.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,11 +11,12 @@ import org.springframework.stereotype.Service;
 import com.isa.OnlyBuns.model.Post;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
 @Service
-public class PostService {
+public class PostService implements IPostService {
 
     @Autowired
     private IPostRepository postRepository;
@@ -77,9 +79,38 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
         return post.getLikes().size();
     }
+    public Long countByUserId(Long userId) {
+        return postRepository.countByUserId(userId);
+    }
 
 
+    public Post addNewPost(PostDTO postDTO, String username) throws IOException {
+        User currentUser = userRepository.findByUsername(username);
+        if (currentUser == null) {
+            throw new IllegalArgumentException("Korisnik nije autentifikovan");
+        }
 
+        Post post = new Post();
+        post.setDescription(postDTO.getDescription());
+        post.setLatitude(postDTO.getLatitude());
+        post.setLongitude(postDTO.getLongitude());
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUserId(currentUser.getId());
+
+        // Validacija i čuvanje slike ako je dostupna
+        if (postDTO.getImageBase64() != null && !postDTO.getImageBase64().isEmpty()) {
+            String imageUrl = imageService.saveImage(postDTO.getImageBase64());
+            post.setImagePath(imageUrl);
+        } else {
+            post.setImagePath(postDTO.getImagePath());
+        }
+
+        post.setIsRemoved(false);
+        post.setComments(new ArrayList<>());
+        post.setLikes(new ArrayList<>());
+
+        return postRepository.save(post);
+    }
 
 
 
