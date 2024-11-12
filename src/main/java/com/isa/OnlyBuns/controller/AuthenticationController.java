@@ -113,19 +113,10 @@ public class AuthenticationController {
         // Sačuvaj novog korisnika bez potrebe za prethodnom autentifikacijom
         User user = this.userService.save(userRequest);
 
-        ////////////////////////
-
-
-        //this.userService.save(userRequest );
 
         String activationLink = "http://localhost:8080/auth/activate?token=" + activationToken;
 
         emailService.sendActivationEmail(user.getEmail(), activationLink);
-
-
-        /////////////////////
-
-
 
         // Nakon registracije, autentifikuj novog korisnika kako bi generisao JWT token
         Authentication authentication = authenticationManager.authenticate(
@@ -140,25 +131,7 @@ public class AuthenticationController {
 
         // Vrati token i informacije o korisniku
         return new ResponseEntity<>(new UserTokenState(jwt, expiresIn), HttpStatus.CREATED);
-    }/*
-    @PostMapping("/activate")
-    public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {
-
-    public ResponseEntity<String> activateAccount(@RequestBody Map<String, String> request) {
-        String token = request.get("token");
-        User user = userService.findByActivationToken(token);
-
-        if (user == null) {
-            return new ResponseEntity<>("Invalid activation token", HttpStatus.BAD_REQUEST);
-        }
-
-        user.setIsActive(true);
-        user.setActivationToken(null); // Očistite token nakon aktivacije
-        userService.updateUser(user);
-
-
-        return new ResponseEntity<>("Account activated successfully", HttpStatus.OK);
-    }*/
+    }
 
     @GetMapping("/activate")
     public ResponseEntity<String> activateAccount(@RequestParam("token") String token) {

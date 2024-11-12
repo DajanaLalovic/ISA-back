@@ -10,7 +10,9 @@ import com.isa.OnlyBuns.enums.UserRole;
 import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
@@ -75,6 +77,16 @@ public class UserController {
     @GetMapping("/user-by-username/{username}")
     @PreAuthorize("isAuthenticated()")
     public User findByUsername(@PathVariable String username) {return this.userService.findByUsername(username);}
+
+    @GetMapping("/check-by-username/{username}")
+    public ResponseEntity<User> checkUsername(@PathVariable String username) {
+        User user = this.userService.findByUsername(username);
+        if (user != null) {
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 
     @GetMapping("/user-whoami")
     @PreAuthorize("isAuthenticated()")
