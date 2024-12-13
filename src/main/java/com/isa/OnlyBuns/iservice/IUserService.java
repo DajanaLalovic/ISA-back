@@ -3,6 +3,7 @@ package com.isa.OnlyBuns.iservice;
 import com.isa.OnlyBuns.dto.UserDTO;
 import com.isa.OnlyBuns.model.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IUserService {
@@ -16,4 +17,5 @@ public interface IUserService {
     User findByActivationToken(String activationToken);
     void updateUser(User user);
     List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder) ;
+    List<User> findUsersByLastLoginBefore(LocalDateTime date);
 }

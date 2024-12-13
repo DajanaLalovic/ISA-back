@@ -1,13 +1,12 @@
 package com.isa.OnlyBuns;
-
-import org.junit.jupiter.api.Test;
+import com.isa.OnlyBuns.service.PostService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 
 @SpringBootTest
 class OnlyBunsApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
+	@Autowired
+	private PostService postService;
 
 }

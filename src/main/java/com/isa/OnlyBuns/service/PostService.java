@@ -4,11 +4,15 @@ import com.isa.OnlyBuns.irepository.IPostRepository;
 import com.isa.OnlyBuns.irepository.IUserRepository;
 import com.isa.OnlyBuns.iservice.IPostService;
 import com.isa.OnlyBuns.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.isa.OnlyBuns.model.Post;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,7 +21,7 @@ import java.util.List;
 
 @Service
 public class PostService implements IPostService {
-
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private IPostRepository postRepository;
     @Autowired
@@ -61,19 +65,24 @@ public class PostService implements IPostService {
             postRepository.save(post);
         }
     }
+    @Transactional(readOnly = false)
     public Post likePost(Integer postId, Integer userId) {
-        Post post = postRepository.findById(postId).orElse(null);
-        if (post == null) {
-            throw new IllegalArgumentException("Post not found");
-        }
-        //da ne sme user dva put isto lajkovati
+        logger.info("> Trying to like post with ID: {}", postId);
+
+        // Pesimističko zaključavanje
+        Post post = postRepository.findPostForUpdate(postId);
+
         if (!post.getLikes().contains(userId)) {
             post.getLikes().add(userId);
             postRepository.save(post);
+            logger.info("User {} liked post {}", userId, postId);
+        } else {
+            logger.info("User {} already liked post {}", userId, postId);
         }
 
         return post;
     }
+
     public int getLikesCount(Integer postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));

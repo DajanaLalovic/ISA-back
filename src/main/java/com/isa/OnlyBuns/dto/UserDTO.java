@@ -2,6 +2,8 @@ package com.isa.OnlyBuns.dto;
 
 import com.isa.OnlyBuns.model.User;
 
+import java.time.LocalDateTime;
+
 public class UserDTO {
     private Long id;
     private String name;
@@ -18,8 +20,8 @@ public class UserDTO {
     private String country;
     private Long postCount;
     private Long followingCount;
-    private String role; // Dodajte polje za ulogu korisnika
-
+    private String role;// Dodajte polje za ulogu korisnika
+    private LocalDateTime lastLogin;
 
     public UserDTO() {
         this.postCount = 0L;
@@ -40,7 +42,7 @@ public class UserDTO {
         this.postCount = user.getPostCount();
         this.followingCount = user.getFollowingCount();
         this.role = user.getRole().toString(); // Pretvorite `UserRole` u string
-
+        this.lastLogin = user.getLastLogin();
     }
 
     public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country, Long postCount, Long followingCount) {
@@ -56,6 +58,13 @@ public class UserDTO {
         this.followingCount = followingCount;
     }
 
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
     public Long getId() {
         return id;
     }

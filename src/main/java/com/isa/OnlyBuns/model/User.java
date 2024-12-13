@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.isa.OnlyBuns.enums.UserRole;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,8 @@ public class User implements UserDetails, Serializable {
     @Column(name = "following_count", nullable = false)
     private Long followingCount ;
 
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
    /* @Column(name = "roles")
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
@@ -93,7 +96,12 @@ public class User implements UserDetails, Serializable {
     public String getEmail() {
         return email;
     }
-
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
     public String getName() {
         return name;
     }

@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -163,7 +164,10 @@ public class UserService implements IUserService {
 
         return filteredUsers;
     }
-
+    @Override
+    public List<User> findUsersByLastLoginBefore(LocalDateTime date) {
+        return userRepository.findByLastLoginBefore(date);
+    }
 }
 
 

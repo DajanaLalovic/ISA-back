@@ -21,6 +21,7 @@ import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.util.TokenUtils;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -86,7 +87,11 @@ public class AuthenticationController {
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            user.setLastLogin(LocalDateTime.now());
 
+            // Konvertuj User u UserDTO i sačuvaj
+            UserDTO userDTO = new UserDTO(user);
+            userService.save(userDTO);
             // Kreiranje JWT tokena
             String jwt = tokenUtils.generateToken(user.getUsername());
             int expiresIn = tokenUtils.getExpiredIn();
