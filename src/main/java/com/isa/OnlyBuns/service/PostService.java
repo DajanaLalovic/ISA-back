@@ -7,6 +7,7 @@ import com.isa.OnlyBuns.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -28,6 +30,10 @@ public class PostService implements IPostService {
     private IUserRepository userRepository;
     @Autowired
     private ImageService imageService;
+
+    @Autowired
+    @Lazy
+    private UserService userService;
 
     public Post findOne(Integer id){return postRepository.findById(id).orElseGet(null);}
 
@@ -119,6 +125,16 @@ public class PostService implements IPostService {
         post.setLikes(new ArrayList<>());
 
         return postRepository.save(post);
+    }
+    public List<Post> getPostsByFollowedUsers(String username) {
+        User currentUser = userService.findByUsername(username);
+        List<Long> followedUserIds = currentUser.getFollowing()
+                .stream()
+                .map(User::getId) // Mapiranje korisnika na njihove ID-eve
+                .collect(Collectors.toList());
+
+        // Pretraga objava po ID-evima korisnika
+        return postRepository.findByUserIdInOrderByCreatedAtDesc(followedUserIds);
     }
 
 

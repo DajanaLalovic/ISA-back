@@ -3,6 +3,12 @@ package com.isa.OnlyBuns.dto;
 import com.isa.OnlyBuns.model.User;
 
 import java.time.LocalDateTime;
+<<<<<<< HEAD
+=======
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+>>>>>>> e4c44f4f93959ac83d7a55e0479a68d6f0615e35
 
 public class UserDTO {
     private Long id;
@@ -20,8 +26,12 @@ public class UserDTO {
     private String country;
     private Long postCount;
     private Long followingCount;
-    private String role;// Dodajte polje za ulogu korisnika
     private LocalDateTime lastLogin;
+    private String role; // Dodajte polje za ulogu korisnika
+    private LocalDateTime activationSentAt;
+    private Set<Long> following = new HashSet<>();
+    private Set<Long> followers = new HashSet<>();
+
 
     public UserDTO() {
         this.postCount = 0L;
@@ -43,9 +53,13 @@ public class UserDTO {
         this.followingCount = user.getFollowingCount();
         this.role = user.getRole().toString(); // Pretvorite `UserRole` u string
         this.lastLogin = user.getLastLogin();
+        this.activationSentAt=user.getActivationSentAt();
+        this.following=user.getFollowing().stream().map(User::getId).collect(Collectors.toSet());
+        this.followers=user.getFollowers().stream().map(User::getId).collect(Collectors.toSet());
+
     }
 
-    public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country, Long postCount, Long followingCount) {
+    public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country, Long postCount, Long followingCount,LocalDateTime activationSentAt,Set<Long> following,Set<Long> followers) {
         this.id = id;
         this.username = username;
         this.active = active;
@@ -56,6 +70,9 @@ public class UserDTO {
         this.country = country;
         this.postCount = postCount;
         this.followingCount = followingCount;
+        this.activationSentAt=activationSentAt;
+        this.following=following;
+        this.followers=followers;
     }
 
     public LocalDateTime getLastLogin() {
@@ -169,5 +186,14 @@ public class UserDTO {
 
     public Long getFollowingCount() {return followingCount;}
     public void setFollowingCount(Long followingCount) {this.followingCount = followingCount;}
+
+    public LocalDateTime getActivationSentAt() {return activationSentAt;}
+    public void setActivationSentAt(LocalDateTime activationSentAt) {this.activationSentAt=activationSentAt;}
+
+    public Set<Long> getFollowing(){return following;}
+    public void setFollowing(Set<Long> following){this.following=following;}
+
+    public Set<Long> getFollowers(){return followers;}
+    public void setFollowers(Set<Long> followers){this.followers=followers;}
 }
 

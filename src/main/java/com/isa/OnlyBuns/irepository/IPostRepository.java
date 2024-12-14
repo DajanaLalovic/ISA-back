@@ -24,7 +24,9 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
     public List<Post> findPostByDescription(String description);
 
     Long countByUserId(Long userId);
+
     int countByCreatedAtAfter(LocalDateTime startTime);
+    List<Post> findByUserIdInOrderByCreatedAtDesc(List<Long> userIds);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Post p WHERE p.id = :id")

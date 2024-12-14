@@ -10,16 +10,21 @@ import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.model.Address;
 import com.isa.OnlyBuns.model.Role;
 import com.isa.OnlyBuns.model.User;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +32,7 @@ public class UserService implements IUserService {
     @Autowired
     private IUserRepository userRepository;
     @Autowired
+    @Lazy
     private IPostService postService;
 
     @Autowired
@@ -38,8 +44,24 @@ public class UserService implements IUserService {
     public String generateActivationToken() {
         return UUID.randomUUID().toString();
     }
+    private final Map<String, RateLimiter> userFollowLimits = new ConcurrentHashMap<>();
 
+    private static final int FOLLOW_LIMIT = 3;
+    private static class RateLimiter {
+        private AtomicInteger followCount = new AtomicInteger(0);
+        private long lastResetTime = System.currentTimeMillis();
 
+        public boolean canFollow() {
+            long currentTime = System.currentTimeMillis();
+
+            if (currentTime - lastResetTime > 60000) {
+                followCount.set(0);
+                lastResetTime = currentTime;
+            }
+           // return followCount.incrementAndGet() <= 50;
+            return followCount.incrementAndGet() <= 3; // maksimalno 3 pracenja po minuti-inicijalno treba 50
+        }
+    }
     @Override
     public User findByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username);
@@ -90,7 +112,7 @@ public class UserService implements IUserService {
         address.setCity(userRequest.getCity());
         address.setPostalCode(userRequest.getPostalCode());
         address.setCountry(userRequest.getCountry());
-
+        u.setActivationSentAt(userRequest.getActivationSentAt());
         u.setAddress(address);
 
         return this.userRepository.save(u);
@@ -121,6 +143,9 @@ public class UserService implements IUserService {
         userDTO.setPassword(user.getPassword());  // Ipak, preporučuje se da lozinku ne šaljete u DTO
         userDTO.setIsActive(user.getIsActive());  // Ako je ovo potrebno u DTO
         userDTO.setActivationToken(user.getActivationToken());
+        userDTO.setFollowingCount(user.getFollowingCount());
+        userDTO.setPostCount(user.getPostCount());
+        userDTO.setActivationSentAt(user.getActivationSentAt());
         return userDTO;
     }
     public User findByActivationToken(String activationToken) {
@@ -131,10 +156,9 @@ public class UserService implements IUserService {
     }
 
 
-    public List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder) {
+    public List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder,int page,int size) {
         List<User> users = userRepository.findAll();
 
-        // Filtriranje korisnika
         List<User> filteredUsers = users.stream()
                 .filter(user -> name == null || user.getName().toLowerCase().contains(name.toLowerCase()))
                 .filter(user -> surname == null || user.getSurname().toLowerCase().contains(surname.toLowerCase()))
@@ -147,7 +171,6 @@ public class UserService implements IUserService {
                 })
                 .collect(Collectors.toList());
 
-        // Sortiranje korisnika
         if ("followingCount".equals(sortBy)) {
             if ("desc".equals(sortOrder)) {
                 filteredUsers.sort(Comparator.comparing(User::getFollowingCount).reversed());
@@ -161,13 +184,101 @@ public class UserService implements IUserService {
                 filteredUsers.sort(Comparator.comparing(User::getEmail));
             }
         }
+        int fromIndex = page * size;
+        int toIndex = Math.min(fromIndex + size, filteredUsers.size());
 
-        return filteredUsers;
+        if (fromIndex > filteredUsers.size()) {
+            return new ArrayList<>();
+        }
+
+        return filteredUsers.subList(fromIndex, toIndex);
+        // return filteredUsers;
     }
+
     @Override
     public List<User> findUsersByLastLoginBefore(LocalDateTime date) {
         return userRepository.findByLastLoginBefore(date);
     }
+
+//    @PostConstruct -testiranje brisanja naloga starijih od 30 dana
+//    public void cleanUpInactiveAccountsOnStartup() {
+//        int retentionDays = 30;
+//        deleteInactiveAccounts(retentionDays);
+//        System.out.println("Deleted inactive accounts on application startup.");
+//    }
+    public List<User> findInactiveAccountsOlderThan() {
+//        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(days);
+
+        return userRepository.findAll().stream()
+                .filter(user -> !Boolean.TRUE.equals(user.getIsActive()) &&
+                        user.getActivationSentAt() != null)
+//                        user.getActivationSentAt().isBefore(cutoffDate))
+                .collect(Collectors.toList());
+    }
+
+    public void deleteInactiveAccounts() {
+        List<User> inactiveUsers = findInactiveAccountsOlderThan();
+
+        for (User user : inactiveUsers) {
+            userRepository.deleteById(user.getId());
+        }
+
+        System.out.println("Deleted inactive accounts older than  days.");
+    }
+
+   // @Scheduled(cron = "0 0 0 L * ?") //brisanje poslednjeg dana u mesecu-u ponoc
+   @Scheduled(cron = "0 */2 * * * ?") // radi provere-brisanje svake dve minute
+   public void scheduledCleanUp() {
+//        int retentionDays = 30;
+        deleteInactiveAccounts();
+    }
+
+    //pracenje
+    public void followUser(Long userId,String currentUsername){
+        User currentUser=findByUsername(currentUsername);
+        User userToFollow=findById(userId);
+
+        if(currentUser.equals(userToFollow)){
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+        if (currentUser.getFollowing().contains(userToFollow)) {
+            throw new IllegalArgumentException("You are already following this user.");
+        }
+        //limiter na 3 pracenja po minuti
+        userFollowLimits.putIfAbsent(currentUsername, new RateLimiter());
+        if (!userFollowLimits.get(currentUsername).canFollow()) {
+            throw new IllegalArgumentException("Follow limit exceeded. Please wait a minute.");
+        }
+        currentUser.getFollowing().add(userToFollow);
+        userToFollow.getFollowers().add(currentUser);
+
+        save(currentUser);
+        save(userToFollow);
+    }
+
+    //otpracivanje
+    public void unfollowUser(Long userId, String currentUsername) {
+        User currentUser = findByUsername(currentUsername);
+        User userToUnfollow = findById(userId);
+
+        if (!currentUser.getFollowing().contains(userToUnfollow)) {
+            throw new IllegalArgumentException("You are not following this user.");
+        }
+
+        currentUser.getFollowing().remove(userToUnfollow);
+        userToUnfollow.getFollowers().remove(currentUser);
+
+        save(currentUser);
+        save(userToUnfollow);
+    }
+    public boolean isFollowing(Long targetUserId, String username) {
+        User currentUser = userRepository.findByUsername(username);
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Target user not found"));
+        return targetUser.getFollowers().contains(currentUser);
+    }
+
+
 }
 
 
