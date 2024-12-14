@@ -21,6 +21,7 @@ import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.util.TokenUtils;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -110,8 +111,9 @@ public class AuthenticationController {
         userRequest.setActivationToken(activationToken);
         userRequest.setPostCount(0L);
         userRequest.setFollowingCount(0L);
+        userRequest.setActivationSentAt(LocalDateTime.now());
         // Sačuvaj novog korisnika bez potrebe za prethodnom autentifikacijom
-        User user = this.userService.save(userRequest);
+        User user = this.userService.save(userRequest); //za brisanje onih kojima je istekao mejl
 
 
         String activationLink = "http://localhost:8080/auth/activate?token=" + activationToken;
@@ -147,5 +149,7 @@ public class AuthenticationController {
 
         return new ResponseEntity<>("Account activated successfully", HttpStatus.OK);
     }
+
+
 
 }

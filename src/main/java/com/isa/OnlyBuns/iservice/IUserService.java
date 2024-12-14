@@ -15,5 +15,11 @@ public interface IUserService {
     UserDTO convertToDTO(User user);
     User findByActivationToken(String activationToken);
     void updateUser(User user);
-    List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder) ;
+    List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder,int page,int size) ;
+    void scheduledCleanUp();
+    void deleteInactiveAccounts();
+    List<User> findInactiveAccountsOlderThan();
+    void unfollowUser(Long userId, String currentUsername);
+    void followUser(Long userId,String currentUsername);
+    boolean isFollowing(Long targetUserId, String username);
 }

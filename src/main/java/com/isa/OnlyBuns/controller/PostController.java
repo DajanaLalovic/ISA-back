@@ -173,6 +173,13 @@ public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO, Principa
         }
     }
 
+    @GetMapping("/followed")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<Post>> getPostsByFollowedUsers(Principal principal) {
+        List<Post> posts = postService.getPostsByFollowedUsers(principal.getName());
+        return ResponseEntity.ok(posts);
+    }
+
 
 }
 

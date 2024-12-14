@@ -112,30 +112,75 @@ public class UserController {
         }
         return user.getRole(); // Pod pretpostavkom da je `getRole()` metoda koja vraća `Role` objekat sa `name` atributom
     }
-//    @GetMapping("/user/search")
-//    @PreAuthorize("isAuthenticated()")
-//    public List<User> searchUsers(
-//            @RequestParam(value = "name", required = false) String name,
-//            @RequestParam(value = "surname", required = false) String surname,
-//            @RequestParam(value = "email", required = false) String email,
-//            @RequestParam(value = "minPostCount", required = false) Long minPostCount,
-//            @RequestParam(value = "maxPostCount", required = false) Long maxPostCount
-//    ) {
-//        return userService.searchUsers(name, surname, email, minPostCount, maxPostCount);
-//    }
-    @GetMapping("/user/search")
+
+@GetMapping("/user/search")
+@PreAuthorize("isAuthenticated()")
+public ResponseEntity<List<User>> searchUsers(
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String surname,
+        @RequestParam(required = false) String email,
+        @RequestParam(required = false) Long minPostCount,
+        @RequestParam(required = false) Long maxPostCount,
+        @RequestParam(required = false) String sortBy,
+        @RequestParam(required = false) String sortOrder,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size
+) {
+    List<User> allFilteredUsers = userService.searchUsers(name, surname, email, minPostCount, maxPostCount, sortBy, sortOrder, page, size);
+    int totalUsers = allFilteredUsers.size();
+
+    List<User> filteredUsers = userService.searchUsers(name, surname, email, minPostCount, maxPostCount, sortBy, sortOrder, 0, Integer.MAX_VALUE);
+    totalUsers = filteredUsers.size();
+
+    int fromIndex = page * size;
+    int toIndex = Math.min(fromIndex + size, totalUsers);
+    List<User> paginatedUsers = filteredUsers.subList(fromIndex, toIndex);
+
+    return ResponseEntity.ok()
+            .header("X-Total-Count", String.valueOf(totalUsers))  
+            .body(paginatedUsers);
+}
+
+    @PostMapping("/follow/{id}")
     @PreAuthorize("isAuthenticated()")
-    public List<User> searchUsers(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String surname,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Long minPostCount,
-            @RequestParam(required = false) Long maxPostCount,
-            @RequestParam(required = false) String sortBy,
-            @RequestParam(required = false) String sortOrder
-    ) {
-        return userService.searchUsers(name, surname, email, minPostCount, maxPostCount, sortBy, sortOrder);
+    public ResponseEntity<String> followUser(@PathVariable Long id, Principal principal) {
+        System.out.println("Principal: " + principal.getName());
+        System.out.println("User ID to follow: " + id);
+        try {
+            userService.followUser(id, principal.getName());
+            return ResponseEntity.ok("Successfully followed the user.");
+        } catch (IllegalArgumentException e) {
+            if ("Follow limit exceeded. Please wait a minute.".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(e.getMessage());
+            }
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
+    @DeleteMapping("/unfollow/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> unfollowUser(@PathVariable Long id, Principal principal) {
+        try {
+            userService.unfollowUser(id, principal.getName());
+            return ResponseEntity.ok("Successfully unfollowed the user.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/follow/status/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Boolean> isFollowing(@PathVariable Long id, Principal principal) {
+        try {
+            boolean isFollowing = userService.isFollowing(id, principal.getName());
+            return ResponseEntity.ok(isFollowing);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+
+
+
 
 
 
