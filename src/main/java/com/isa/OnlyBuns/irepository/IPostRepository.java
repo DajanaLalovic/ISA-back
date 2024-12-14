@@ -26,7 +26,6 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
     Long countByUserId(Long userId);
     int countByCreatedAtAfter(LocalDateTime startTime);
 
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Post p WHERE p.id = :id")
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value ="0")})

@@ -87,14 +87,12 @@ public class AuthenticationController {
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            user.setLastLogin(LocalDateTime.now());
 
-            // Konvertuj User u UserDTO i sačuvaj
-            UserDTO userDTO = new UserDTO(user);
-            userService.save(userDTO);
             // Kreiranje JWT tokena
             String jwt = tokenUtils.generateToken(user.getUsername());
             int expiresIn = tokenUtils.getExpiredIn();
+            user.setLastLogin(LocalDateTime.now());
+            userService.updateUser(user); // Poziv metode za ažuriranje korisnika
 
             return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
 
