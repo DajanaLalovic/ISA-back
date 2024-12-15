@@ -57,6 +57,8 @@ public class User implements UserDetails, Serializable {
 
     @Column(name = "following_count", nullable = false)
     private Long followingCount ;
+    @Column(name = "followers_count", nullable = false)
+    private Long followersCount ;
 
     @Column(name = "activation_sent_at")
     private LocalDateTime activationSentAt; // Vreme kada je poslat aktivacioni mejl
@@ -187,6 +189,8 @@ public class User implements UserDetails, Serializable {
     public Set<User> getFollowers() { return followers; }
 
     public void setFollowers(Set<User> followers) { this.followers = followers;}
+    public Long getFollowersCount() { return followersCount; }
+    public void setFollowersCount(Long followersCount) {this.followersCount = followersCount; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -218,6 +222,7 @@ public class User implements UserDetails, Serializable {
                 ", postCount=" + postCount +'\''+
                 ", followingCount=" + followingCount +'\''+
                 ", activationSentAt=" + activationSentAt +'\''+
+                ", followersCount=" + followersCount +'\''+
                 '}';
     }
 }

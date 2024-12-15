@@ -8,19 +8,17 @@ import com.isa.OnlyBuns.iservice.IPostService;
 import com.isa.OnlyBuns.iservice.IRoleService;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.model.Address;
-import com.isa.OnlyBuns.model.Role;
 import com.isa.OnlyBuns.model.User;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -228,6 +226,7 @@ public class UserService implements IUserService {
     }
 
     //pracenje
+    @Transactional
     public void followUser(Long userId,String currentUsername){
         User currentUser=findByUsername(currentUsername);
         User userToFollow=findById(userId);
@@ -245,6 +244,9 @@ public class UserService implements IUserService {
         }
         currentUser.getFollowing().add(userToFollow);
         userToFollow.getFollowers().add(currentUser);
+
+        currentUser.setFollowingCount((long) currentUser.getFollowing().size());
+        userToFollow.setFollowersCount((long) userToFollow.getFollowers().size());
 
         save(currentUser);
         save(userToFollow);
