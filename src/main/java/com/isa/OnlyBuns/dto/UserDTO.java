@@ -3,12 +3,10 @@ package com.isa.OnlyBuns.dto;
 import com.isa.OnlyBuns.model.User;
 
 import java.time.LocalDateTime;
-<<<<<<< HEAD
-=======
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
->>>>>>> e4c44f4f93959ac83d7a55e0479a68d6f0615e35
+
 
 public class UserDTO {
     private Long id;
