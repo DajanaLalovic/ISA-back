@@ -48,6 +48,13 @@ public class CommentService implements ICommentService {
         Post post = postRepository.findById(commentDTO.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("Objava nije pronađena"));
 
+        User postOwner = userRepository.findById(post.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Vlasnik objave nije pronađen."));
+
+        // Provera da li trenutni korisnik prati vlasnika objave
+        if (!postOwner.getFollowers().contains(currentUser)) {
+            throw new IllegalArgumentException("Komentarisanje je dozvoljeno samo na objavama naloga koje pratite.");
+        }
         Comment comment = new Comment();
         comment.setText(commentDTO.getText());
         comment.setUserId(currentUser.getId());
