@@ -45,6 +45,7 @@ public class UserService implements IUserService {
     private final Map<String, RateLimiter> userFollowLimits = new ConcurrentHashMap<>();
 
     private static final int FOLLOW_LIMIT = 3;
+    //    private static final int FOLLOW_LIMIT = 50;-inace
     private static class RateLimiter {
         private AtomicInteger followCount = new AtomicInteger(0);
         private long lastResetTime = System.currentTimeMillis();
@@ -111,6 +112,7 @@ public class UserService implements IUserService {
         address.setPostalCode(userRequest.getPostalCode());
         address.setCountry(userRequest.getCountry());
         u.setActivationSentAt(userRequest.getActivationSentAt());
+        u.setFollowersCount(userRequest.getFollowersCount());
         u.setAddress(address);
 
         return this.userRepository.save(u);
@@ -142,7 +144,7 @@ public class UserService implements IUserService {
         userDTO.setIsActive(user.getIsActive());  // Ako je ovo potrebno u DTO
         userDTO.setActivationToken(user.getActivationToken());
         userDTO.setFollowingCount(user.getFollowingCount());
-        userDTO.setPostCount(user.getPostCount());
+       // userDTO.setPostCount(user.getPostCount());
         userDTO.setActivationSentAt(user.getActivationSentAt());
         return userDTO;
     }
@@ -227,21 +229,23 @@ public class UserService implements IUserService {
 
     //pracenje
     @Transactional
-    public void followUser(Long userId,String currentUsername){
-        User currentUser=findByUsername(currentUsername);
-        User userToFollow=findById(userId);
+    public void followUser(Long userId, String currentUsername) {
+        User currentUser = findByUsername(currentUsername);
+        User userToFollow = userRepository.findByIdWithLock(userId); // zakljucavanje-za konkurentno
 
-        if(currentUser.equals(userToFollow)){
+        if (currentUser.equals(userToFollow)) {
             throw new IllegalArgumentException("You cannot follow yourself.");
         }
         if (currentUser.getFollowing().contains(userToFollow)) {
             throw new IllegalArgumentException("You are already following this user.");
         }
-        //limiter na 3 pracenja po minuti
+
+        // limiter na 3 pracenja po minuti
         userFollowLimits.putIfAbsent(currentUsername, new RateLimiter());
         if (!userFollowLimits.get(currentUsername).canFollow()) {
             throw new IllegalArgumentException("Follow limit exceeded. Please wait a minute.");
         }
+
         currentUser.getFollowing().add(userToFollow);
         userToFollow.getFollowers().add(currentUser);
 
@@ -251,6 +255,7 @@ public class UserService implements IUserService {
         save(currentUser);
         save(userToFollow);
     }
+
 
     //otpracivanje
     public void unfollowUser(Long userId, String currentUsername) {

@@ -3,6 +3,7 @@ package com.isa.OnlyBuns;
 import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.irepository.IUserRepository;
 import com.isa.OnlyBuns.service.UserService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,14 @@ public class FollowersServiceTest {
     private IUserRepository userRepository;
 
     private User userToFollow;
-    private User follower;
+    private User follower1;
+    private User follower2;
 
     @BeforeEach
     public void setUp() {
-        userRepository.deleteAll(); // Očisti sve korisnike iz baze pre testa
+        userRepository.deleteAll(); // pre testova brisi bazu
         userRepository.flush();
-        // Kreiraj korisnika koji će biti praćen
+        //korisnikkog ce zapratiti
         userToFollow = new User();
         userToFollow.setUsername("UserToFollow");
         userToFollow.setPassword("password");
@@ -43,19 +45,38 @@ public class FollowersServiceTest {
         userToFollow.setFollowersCount(0L);
         userRepository.save(userToFollow);
 
-        // Kreiraj korisnika koji će pratiti
-        follower = new User();
-        follower.setUsername("Follower");
-        follower.setPassword("password");
-        follower.setEmail("follower@example.com");
-        follower.setName("Jane");
-        follower.setSurname("Smith");
-        follower.setIsActive(true);
-        follower.setPostCount(0L);
-        follower.setFollowingCount(0L);
-        follower.setFollowersCount(0L);
-        userRepository.save(follower);
+        //dva korisnika koja ce vrsiti zapracivanje
+        follower1 = new User();
+        follower1.setUsername("Follower1");
+        follower1.setPassword("password");
+        follower1.setEmail("follower1@example.com");
+        follower1.setName("FollowerName1");
+        follower1.setSurname("FollowerSurname1");
+        follower1.setIsActive(true);
+        follower1.setPostCount(0L);
+        follower1.setFollowingCount(0L);
+        follower1.setFollowersCount(0L);
+        userRepository.save(follower1);
+
+        follower2 = new User();
+        follower2.setUsername("Follower2");
+        follower2.setPassword("password");
+        follower2.setEmail("follower2@example.com");
+        follower2.setName("FollowerName2");
+        follower2.setSurname("FollowerSurname2");
+        follower2.setIsActive(true);
+        follower2.setPostCount(0L);
+        follower2.setFollowingCount(0L);
+        follower2.setFollowersCount(0L);
+        userRepository.save(follower2);
     }
+    //za brisanje posle testa
+    @AfterEach
+    public void tearDown() {
+        userRepository.deleteAll();
+        userRepository.flush();
+    }
+
 
     @Test
     public void testConcurrentFollowUserWithSleep() throws Exception {
@@ -64,27 +85,28 @@ public class FollowersServiceTest {
         Future<?> thread1 = executor.submit(() -> {
             try {
                 System.out.println("Thread 1 starting...");
-                userService.followUser(userToFollow.getId(), follower.getUsername());
-                Thread.sleep(3000); // Uspavljivanje kako bi drugi thread pokušao da izvrši istu operaciju
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                userService.followUser(userToFollow.getId(), follower1.getUsername());
+                Thread.sleep(2000); // Simulacija kašnjenja
+            } catch (Exception e) {
+                System.err.println("Error in Thread 1: " + e.getMessage());
             }
         });
 
         Future<?> thread2 = executor.submit(() -> {
             try {
                 System.out.println("Thread 2 starting...");
-                userService.followUser(userToFollow.getId(), follower.getUsername());
+                userService.followUser(userToFollow.getId(), follower2.getUsername());
             } catch (Exception e) {
-                System.out.println("Thread 2 encountered an exception: " + e.getMessage());
+                System.err.println("Error in Thread 2: " + e.getMessage());
             }
         });
 
         thread1.get(); // Sačekaj završetak prve niti
         thread2.get(); // Sačekaj završetak druge niti
 
+        // Proveri broj pratilaca korisnika koji je praćen (userToFollow)
         User updatedUser = userRepository.findById(userToFollow.getId()).orElse(null);
-        assertEquals(1, updatedUser.getFollowersCount()); // Proveri da broj pratilaca nije dupliran
-    }
+        assertEquals(2, updatedUser.getFollowersCount());
 
+    }
 }
