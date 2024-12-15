@@ -175,9 +175,13 @@ public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO, Principa
 
     @GetMapping("/followed")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Post>> getPostsByFollowedUsers(Principal principal) {
+    public ResponseEntity<List<PostDTO>> getPostsByFollowedUsers(Principal principal) {
         List<Post> posts = postService.getPostsByFollowedUsers(principal.getName());
-        return ResponseEntity.ok(posts);
+        // Konvertujemo entitete u DTO-ove kako bismo izbegli rekurziju
+        List<PostDTO> postsDTO = posts.stream()
+                .map(PostDTO::new) // Koristi PostDTO konstruktor
+                .toList();
+        return ResponseEntity.ok(postsDTO);
     }
 
 

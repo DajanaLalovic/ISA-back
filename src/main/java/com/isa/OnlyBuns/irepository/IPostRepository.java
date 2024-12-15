@@ -33,3 +33,4 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value ="0")})
     Post findPostForUpdate(@Param("id") Integer id);
 }
+

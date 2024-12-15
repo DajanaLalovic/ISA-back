@@ -126,16 +126,18 @@ public class PostService implements IPostService {
 
         return postRepository.save(post);
     }
+
     public List<Post> getPostsByFollowedUsers(String username) {
         User currentUser = userService.findByUsername(username);
         List<Long> followedUserIds = currentUser.getFollowing()
                 .stream()
-                .map(User::getId) // Mapiranje korisnika na njihove ID-eve
-                .collect(Collectors.toList());
+                .map(User::getId)
+                .toList();
 
         // Pretraga objava po ID-evima korisnika
         return postRepository.findByUserIdInOrderByCreatedAtDesc(followedUserIds);
     }
+
 
 
 
