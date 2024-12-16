@@ -1,6 +1,7 @@
 package com.isa.OnlyBuns.controller;
 
 import com.isa.OnlyBuns.service.EmailService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,10 @@ import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.util.TokenUtils;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
-
+import java.util.concurrent.ConcurrentHashMap;
 
 //Kontroler zaduzen za autentifikaciju korisnika
 @RestController
@@ -41,30 +43,116 @@ public class AuthenticationController {
     @Autowired
     private EmailService emailService;
 
-    // Prvi endpoint koji pogadja korisnik kada se loguje.
-    // Tada zna samo svoje korisnicko ime i lozinku i to prosledjuje na backend.
-  /*  @PostMapping("/login")
-    public ResponseEntity<UserTokenState> createAuthenticationToken(
-            @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) {
-        // Ukoliko kredencijali nisu ispravni, logovanje nece biti uspesno, desice se
-        // AuthenticationException
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 
-        // Ukoliko je autentifikacija uspesna, ubaci korisnika u trenutni security
-        // kontekst
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    private static final int MAX_ATTEMPTS = 5;
+    private static final long TIME_WINDOW_MS = 60 * 1000; // 1 minute
+    private final Map<String, LoginAttempt> loginAttempts = new ConcurrentHashMap<>();
 
-        // Kreiraj token za tog korisnika
-        User user = (User) authentication.getPrincipal();
-        String jwt = tokenUtils.generateToken(user.getUsername());
-        int expiresIn = tokenUtils.getExpiredIn();
-
-        // Vrati token kao odgovor na uspesnu autentifikaciju
-        return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
-    }
-*/
     @PostMapping("/login")
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtAuthenticationRequest authenticationRequest,
+                                                       HttpServletRequest request,
+                                                       HttpServletResponse response) {
+        String clientIp = request.getRemoteAddr();
+
+        // Proveri broj pokušaja za IP adresu
+        if (isBlocked(clientIp)) {
+            return new ResponseEntity<>("Too many login attempts. Try again later.", HttpStatus.TOO_MANY_REQUESTS);
+        }
+
+        try {
+            // Proveri da li korisnik postoji
+            User user = userService.findByUsername(authenticationRequest.getUsername());
+
+            if (user == null) {
+                registerFailedAttempt(clientIp);
+                return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
+            }
+
+            // Proveri da li je korisnik aktiviran
+            if (!user.getIsActive()) {
+                return new ResponseEntity<>("Your account isn't activated yet. Check your mail.", HttpStatus.FORBIDDEN);
+            }
+
+            // Autentifikacija korisnika
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Uspešan login - resetuj pokušaje za IP
+            resetAttempts(clientIp);
+
+            // Generiši JWT token
+            String jwt = tokenUtils.generateToken(user.getUsername());
+            int expiresIn = tokenUtils.getExpiredIn();
+
+            return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
+
+        } catch (Exception e) {
+            registerFailedAttempt(clientIp);
+            return new ResponseEntity<>("Login failed", HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    private boolean isBlocked(String ip) {
+        LoginAttempt attempt = loginAttempts.get(ip);
+        if (attempt == null) {
+            return false;
+        }
+        if (attempt.getCount() >= MAX_ATTEMPTS && Instant.now().toEpochMilli() - attempt.getLastAttemptTime() < TIME_WINDOW_MS) {
+            return true;
+        }
+
+        if (Instant.now().toEpochMilli() - attempt.getLastAttemptTime() >= TIME_WINDOW_MS) {
+            resetAttempts(ip);
+        }
+
+        return false;
+    }
+
+    private void registerFailedAttempt(String ip) {
+        loginAttempts.merge(ip, new LoginAttempt(1, Instant.now().toEpochMilli()), (oldAttempt, newAttempt) -> {
+            if (Instant.now().toEpochMilli() - oldAttempt.getLastAttemptTime() < TIME_WINDOW_MS) {
+                oldAttempt.increment();
+                oldAttempt.setLastAttemptTime(Instant.now().toEpochMilli());
+                return oldAttempt;
+            } else {
+                return newAttempt;
+            }
+        });
+    }
+
+    private void resetAttempts(String ip) {
+        loginAttempts.remove(ip);
+    }
+    private static class LoginAttempt {
+        private int count;
+        private long lastAttemptTime;
+
+        public LoginAttempt(int count, long lastAttemptTime) {
+            this.count = count;
+            this.lastAttemptTime = lastAttemptTime;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public void increment() {
+            this.count++;
+        }
+
+        public long getLastAttemptTime() {
+            return lastAttemptTime;
+        }
+
+        public void setLastAttemptTime(long lastAttemptTime) {
+            this.lastAttemptTime = lastAttemptTime;
+        }
+    }
+
+
+    /*@PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(
             @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) {
         try {
@@ -97,6 +185,7 @@ public class AuthenticationController {
             return new ResponseEntity<>("Login failed", HttpStatus.UNAUTHORIZED);
         }
     }
+*/
 
     @PostMapping("/signup")
     public ResponseEntity<UserTokenState> addUser(@RequestBody UserDTO userRequest, UriComponentsBuilder ucBuilder) {

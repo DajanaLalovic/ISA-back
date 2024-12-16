@@ -81,6 +81,21 @@ public class User implements UserDetails, Serializable {
         this.active = false;
     }
 
+    public User(Long id, String name, String surname, String email, String username, Boolean active, String password, String activationToken, UserRole role, Address address, Long postCount, Long followingCount) {
+        this.id = id;
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.username = username;
+        this.active = active;
+        this.password = password;
+        this.activationToken = activationToken;
+        this.role = role;
+        this.address = address;
+        this.postCount = postCount;
+        this.followingCount = followingCount;
+    }
+
     // Getteri i setteri
     public Long getId() {
         return id;

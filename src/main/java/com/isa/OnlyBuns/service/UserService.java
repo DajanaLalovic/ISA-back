@@ -17,6 +17,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -164,6 +165,30 @@ public class UserService implements IUserService {
         return filteredUsers;
     }
 
+    public void updatePassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+    @Transactional
+    public User registerUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+        System.out.println("Saving user: " + user.getUsername());
+        User savedUser = userRepository.save(user);
+        userRepository.flush();
+        System.out.println("User saved: " + savedUser.getUsername());
+        return savedUser;
+    }
+    @Transactional
+    @Override
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
+    }
 }
+
 
 

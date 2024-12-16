@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class Post {
@@ -143,6 +145,8 @@ public class Post {
     public void setLikes(List<Integer> likes) {
         this.likes = likes;
     }
+
+
 
     @Override
     public String toString() {

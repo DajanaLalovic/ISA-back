@@ -1,16 +1,22 @@
 package com.isa.OnlyBuns.service;
 import com.isa.OnlyBuns.dto.PostDTO;
+import com.isa.OnlyBuns.irepository.IPostLikeRepository;
 import com.isa.OnlyBuns.irepository.IPostRepository;
 import com.isa.OnlyBuns.irepository.IUserRepository;
 import com.isa.OnlyBuns.iservice.IPostService;
+import com.isa.OnlyBuns.model.PostLike;
 import com.isa.OnlyBuns.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.isa.OnlyBuns.model.Post;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +30,8 @@ public class PostService implements IPostService {
     private IUserRepository userRepository;
     @Autowired
     private ImageService imageService;
+    @Autowired
+    private IPostLikeRepository postLikeRepository;
 
     public Post findOne(Integer id){return postRepository.findById(id).orElseGet(null);}
 
@@ -31,6 +39,7 @@ public class PostService implements IPostService {
 
     public Page<Post> findAll(Pageable pageable){return postRepository.findAll(pageable);}
 
+    @CacheEvict(value = {"totalPosts", "postsLast30Days", "top5Last7Days", "top10AllTime"}, allEntries = true)
     public Post save(Post post){return postRepository.save(post);}
 
     public void delete(Integer id){postRepository.deleteById(id);}
@@ -69,6 +78,9 @@ public class PostService implements IPostService {
         //da ne sme user dva put isto lajkovati
         if (!post.getLikes().contains(userId)) {
             post.getLikes().add(userId);
+
+            PostLike postLike = new PostLike(postId,userId, LocalDateTime.now());
+            postLikeRepository.save(postLike);
             postRepository.save(post);
         }
 
@@ -112,6 +124,25 @@ public class PostService implements IPostService {
         return postRepository.save(post);
     }
 
-
+    @Cacheable("totalPosts")
+    public long getTotalPosts() {
+        return postRepository.count();
+    }
+    @Cacheable("postsLast30Days")
+    public long countPostsLastMonth() {
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minus(1, ChronoUnit.MONTHS);
+        return postRepository.countByCreatedAtAfter(oneMonthAgo);
+    }
+    @Cacheable("top5Last7Days")
+    public List<Post> getTop5MostLikedPostsLast7Days() {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        Pageable pageable = PageRequest.of(0, 5); // Ograničavamo na 5 objava
+        return postRepository.findTop5MostLikedPostsLast7Days(sevenDaysAgo, pageable);
+    }
+    @Cacheable("top10AllTime")
+    public List<Post> getTop10MostLikedPosts() {
+        Pageable pageable = PageRequest.of(0, 10); // Ograničavamo na 10 objava
+        return postRepository.findTop10MostLikedPosts(pageable);
+    }
 
 }
