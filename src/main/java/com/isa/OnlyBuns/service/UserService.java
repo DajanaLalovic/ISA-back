@@ -35,6 +35,9 @@ public class UserService implements IUserService {
     @Autowired
     private IRoleService roleService;
 
+
+    //private BloomFilter<String> usernameBloomFilter;
+
     public String generateActivationToken() {
         return UUID.randomUUID().toString();
     }
