@@ -197,6 +197,12 @@ public class UserService implements IUserService {
         return filteredUsers.subList(fromIndex, toIndex);
         // return filteredUsers;
     }
+
+    @Override
+    public List<User> findUsersByLastLoginBefore(LocalDateTime date) {
+        return userRepository.findByLastLoginBefore(date);
+    }
+
 //    @PostConstruct -testiranje brisanja naloga starijih od 30 dana
 //    public void cleanUpInactiveAccountsOnStartup() {
 //        int retentionDays = 30;

@@ -60,8 +60,13 @@ public class User implements UserDetails, Serializable {
     @Column(name = "followers_count", nullable = false)
     private Long followersCount ;
 
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
+
     @Column(name = "activation_sent_at")
     private LocalDateTime activationSentAt; // Vreme kada je poslat aktivacioni mejl
+
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinTable(
@@ -132,7 +137,12 @@ public class User implements UserDetails, Serializable {
     public String getEmail() {
         return email;
     }
-
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
     public String getName() {
         return name;
     }

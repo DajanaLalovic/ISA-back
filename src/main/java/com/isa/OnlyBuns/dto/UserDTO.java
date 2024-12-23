@@ -24,6 +24,7 @@ public class UserDTO {
     private Long postCount;
     private Long followingCount;
     private Long followersCount;
+    private LocalDateTime lastLogin;
     private String role; // Dodajte polje za ulogu korisnika
     private LocalDateTime activationSentAt;
     private Set<Long> following = new HashSet<>();
@@ -31,7 +32,7 @@ public class UserDTO {
 
     public UserDTO() {
         this.postCount = 0L;
-//        this.followingCount = 0L;
+        this.followingCount = 0L;
     }
 
     public UserDTO(User user) {
@@ -49,6 +50,7 @@ public class UserDTO {
         this.followingCount = user.getFollowingCount();
         this.followersCount= user.getFollowersCount();
         this.role = user.getRole().toString(); // Pretvorite `UserRole` u string
+        this.lastLogin = user.getLastLogin();
         this.activationSentAt=user.getActivationSentAt();
         this.following=user.getFollowing().stream().map(User::getId).collect(Collectors.toSet());
         this.followers=user.getFollowers().stream().map(User::getId).collect(Collectors.toSet());
@@ -71,6 +73,13 @@ public class UserDTO {
         this.followersCount=followersCount;
     }
 
+    public LocalDateTime getLastLogin() {
+        return lastLogin;
+    }
+
+    public void setLastLogin(LocalDateTime lastLogin) {
+        this.lastLogin = lastLogin;
+    }
     public Long getId() {
         return id;
     }

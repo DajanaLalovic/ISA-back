@@ -3,6 +3,7 @@ package com.isa.OnlyBuns.iservice;
 import com.isa.OnlyBuns.dto.UserDTO;
 import com.isa.OnlyBuns.model.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IUserService {
@@ -15,6 +16,7 @@ public interface IUserService {
     UserDTO convertToDTO(User user);
     User findByActivationToken(String activationToken);
     void updateUser(User user);
+    List<User> findUsersByLastLoginBefore(LocalDateTime date);
     void updatePassword(Long userId, String newPassword);
     User registerUser(User user);
     public void deleteUserById(Long id);
