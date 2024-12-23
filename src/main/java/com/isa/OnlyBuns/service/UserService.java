@@ -272,6 +272,9 @@ public class UserService implements IUserService {
         currentUser.getFollowing().remove(userToUnfollow);
         userToUnfollow.getFollowers().remove(currentUser);
 
+        currentUser.setFollowingCount((long) currentUser.getFollowing().size());
+        userToUnfollow.setFollowersCount((long) userToUnfollow.getFollowers().size());
+
         save(currentUser);
         save(userToUnfollow);
     }
