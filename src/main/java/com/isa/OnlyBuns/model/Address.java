@@ -25,6 +25,17 @@ public class Address {
     @Column(name = "country", nullable = false)
     private String country;
 
+    public Address() {}
+
+    public Address(Long id, String street, String number, String city, String postalCode, String country) {
+        this.id = id;
+        this.street = street;
+        this.number = number;
+        this.city = city;
+        this.postalCode = postalCode;
+        this.country = country;
+    }
+
     // Getteri i setteri
     public Long getId() {
         return id;

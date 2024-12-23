@@ -15,6 +15,9 @@ public interface IUserService {
     UserDTO convertToDTO(User user);
     User findByActivationToken(String activationToken);
     void updateUser(User user);
+    void updatePassword(Long userId, String newPassword);
+    User registerUser(User user);
+    public void deleteUserById(Long id);
     List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder,int page,int size) ;
     void scheduledCleanUp();
     void deleteInactiveAccounts();

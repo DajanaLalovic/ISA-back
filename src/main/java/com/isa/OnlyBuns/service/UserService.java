@@ -39,6 +39,9 @@ public class UserService implements IUserService {
     @Autowired
     private IRoleService roleService;
 
+
+    //private BloomFilter<String> usernameBloomFilter;
+
     public String generateActivationToken() {
         return UUID.randomUUID().toString();
     }
@@ -280,6 +283,30 @@ public class UserService implements IUserService {
     }
 
 
+    public void updatePassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+    @Transactional
+    public User registerUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+        System.out.println("Saving user: " + user.getUsername());
+        User savedUser = userRepository.save(user);
+        userRepository.flush();
+        System.out.println("User saved: " + savedUser.getUsername());
+        return savedUser;
+    }
+    @Transactional
+    @Override
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
+    }
 }
+
 
 

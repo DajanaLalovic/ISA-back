@@ -110,7 +110,7 @@ public class UserController {
         if (user == null) {
             throw new IllegalArgumentException("User not found");
         }
-        return user.getRole(); // Pod pretpostavkom da je `getRole()` metoda koja vraća `Role` objekat sa `name` atributom
+        return user.getRole();
     }
 
 @GetMapping("/user/search")
@@ -178,6 +178,17 @@ public ResponseEntity<List<User>> searchUsers(
         }
     }
 
+    @PutMapping("/profile/{userId}/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updatePassword(@PathVariable Long userId, @RequestBody Map<String, String> request, Principal principal) {
+        String newPassword = request.get("newPassword");
+        if (newPassword == null || newPassword.isEmpty()) {
+            return ResponseEntity.badRequest().body("New password is required");
+        }
+
+        userService.updatePassword(userId, newPassword);
+        return ResponseEntity.ok("Password updated successfully");
+    }
 
 
 
