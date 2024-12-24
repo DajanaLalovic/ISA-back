@@ -22,6 +22,7 @@ import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.util.TokenUtils;
 
+import java.time.LocalDateTime;
 import java.time.Instant;
 import java.util.Map;
 import java.util.UUID;
@@ -85,7 +86,8 @@ public class AuthenticationController {
             // Generiši JWT token
             String jwt = tokenUtils.generateToken(user.getUsername());
             int expiresIn = tokenUtils.getExpiredIn();
-
+            user.setLastLogin(LocalDateTime.now());
+            userService.updateUser(user);
             return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
 
         } catch (Exception e) {
@@ -178,6 +180,8 @@ public class AuthenticationController {
             // Kreiranje JWT tokena
             String jwt = tokenUtils.generateToken(user.getUsername());
             int expiresIn = tokenUtils.getExpiredIn();
+            user.setLastLogin(LocalDateTime.now());
+            userService.updateUser(user); // Poziv metode za ažuriranje korisnika
 
             return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
 
@@ -199,6 +203,8 @@ public class AuthenticationController {
         userRequest.setActivationToken(activationToken);
         userRequest.setPostCount(0L);
         userRequest.setFollowingCount(0L);
+        userRequest.setActivationSentAt(LocalDateTime.now());
+        userRequest.setFollowersCount(0L);
         // Sačuvaj novog korisnika bez potrebe za prethodnom autentifikacijom
         User user = this.userService.save(userRequest);
 

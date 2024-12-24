@@ -22,7 +22,24 @@ public class PostDTO {
     }
 
     public PostDTO(Post post) {
-        this(post.getId(), post.getDescription(), post.getImagePath(), post.getLatitude(),post.getLongitude(),post.getCreatedAt(), post.getUserId(),post.getIsRemoved(),null,null);
+        this.id = post.getId();
+        this.description = post.getDescription();
+        this.imagePath = post.getImagePath();
+        this.latitude = post.getLatitude();
+        this.longitude = post.getLongitude();
+        this.createdAt = post.getCreatedAt();
+        this.userId = post.getUserId();
+        this.isRemoved = post.getIsRemoved();
+
+        // Mapirajte komentare u CommentDTO
+        this.comments = post.getComments()
+                .stream()
+                .map(CommentDTO::new)
+                .toList(); // Pretvori komentare u DTO, bez rekurzije
+
+
+        // Mapirajte lajkove
+        this.likes = post.getLikes();
     }
 
 
@@ -94,4 +111,22 @@ public class PostDTO {
     public void setImageBase64(String imageBase64) {
         this.imageBase64 = imageBase64;
     }
+
+    @Override
+    public String toString() {
+        return "PostDTO{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", createdAt=" + createdAt +
+                ", userId=" + userId +
+                ", comments=" + comments +
+                ", likes=" + likes +
+                ", imageBase64='" + imageBase64 + '\'' +
+                ", isRemoved=" + isRemoved +
+                '}';
+    }
 }
+

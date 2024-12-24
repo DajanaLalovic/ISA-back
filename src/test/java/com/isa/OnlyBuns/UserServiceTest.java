@@ -62,7 +62,8 @@ public class UserServiceTest {
                 UserRole.USER, // Uloga
                 address1, // Adresa
                 0L, // Broj postova
-                0L // Broj pratilaca
+                0L ,// Broj pratilaca
+                0L //br following
         );
 
         User user2 = new User(
@@ -77,7 +78,9 @@ public class UserServiceTest {
                 UserRole.USER, // Uloga
                 address2, // Adresa
                 0L, // Broj postova
-                0L // Broj pratilaca
+                0L ,// Broj pratilaca
+                0L //br following
+
         );
 
         AtomicInteger failedAttempts = new AtomicInteger(0);

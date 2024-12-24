@@ -18,7 +18,7 @@ public class Post {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String imagePath;
 
     @Column(nullable = false)
@@ -37,13 +37,14 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "post_likes")
     @Column(name = "user_id")
     private List<Integer> likes= new ArrayList<>();
 
     @Column(name = "is_removed")
     private Boolean isRemoved;
+
 
     public Post() {
         this.comments = new ArrayList<>();

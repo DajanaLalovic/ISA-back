@@ -6,24 +6,30 @@ import com.isa.OnlyBuns.irepository.IUserRepository;
 import com.isa.OnlyBuns.iservice.IPostService;
 import com.isa.OnlyBuns.model.PostLike;
 import com.isa.OnlyBuns.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.isa.OnlyBuns.model.Post;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
 public class PostService implements IPostService {
-
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private IPostRepository postRepository;
     @Autowired
@@ -32,6 +38,10 @@ public class PostService implements IPostService {
     private ImageService imageService;
     @Autowired
     private IPostLikeRepository postLikeRepository;
+
+    @Autowired
+    @Lazy
+    private UserService userService;
 
     public Post findOne(Integer id){return postRepository.findById(id).orElseGet(null);}
 
@@ -70,22 +80,27 @@ public class PostService implements IPostService {
             postRepository.save(post);
         }
     }
+    @Transactional(readOnly = false)
     public Post likePost(Integer postId, Integer userId) {
-        Post post = postRepository.findById(postId).orElse(null);
-        if (post == null) {
-            throw new IllegalArgumentException("Post not found");
-        }
-        //da ne sme user dva put isto lajkovati
+        logger.info("> Trying to like post with ID: {}", postId);
+
+        // Pesimističko zaključavanje
+        Post post = postRepository.findPostForUpdate(postId);
+
         if (!post.getLikes().contains(userId)) {
             post.getLikes().add(userId);
 
             PostLike postLike = new PostLike(postId,userId, LocalDateTime.now());
             postLikeRepository.save(postLike);
             postRepository.save(post);
+            logger.info("User {} liked post {}", userId, postId);
+        } else {
+            logger.info("User {} already liked post {}", userId, postId);
         }
 
         return post;
     }
+
     public int getLikesCount(Integer postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
@@ -124,6 +139,17 @@ public class PostService implements IPostService {
         return postRepository.save(post);
     }
 
+    public List<Post> getPostsByFollowedUsers(String username) {
+        User currentUser = userService.findByUsername(username);
+        List<Long> followedUserIds = currentUser.getFollowing()
+                .stream()
+                .map(User::getId)
+                .toList();
+
+        // Pretraga objava po ID-evima korisnika
+        return postRepository.findByUserIdInOrderByCreatedAtDesc(followedUserIds);
+    }
+
     @Cacheable("totalPosts")
     public long getTotalPosts() {
         return postRepository.count();
@@ -131,7 +157,7 @@ public class PostService implements IPostService {
     @Cacheable("postsLast30Days")
     public long countPostsLastMonth() {
         LocalDateTime oneMonthAgo = LocalDateTime.now().minus(1, ChronoUnit.MONTHS);
-        return postRepository.countByCreatedAtAfter(oneMonthAgo);
+        return Long.valueOf(postRepository.countByCreatedAtAfter(oneMonthAgo));
     }
     @Cacheable("top5Last7Days")
     public List<Post> getTop5MostLikedPostsLast7Days() {
@@ -144,5 +170,6 @@ public class PostService implements IPostService {
         Pageable pageable = PageRequest.of(0, 10); // Ograničavamo na 10 objava
         return postRepository.findTop10MostLikedPosts(pageable);
     }
+
 
 }
