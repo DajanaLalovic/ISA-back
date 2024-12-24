@@ -35,6 +35,10 @@ public class UserService implements IUserService {
     @Autowired
     private IRoleService roleService;
 
+    @Autowired
+    private BloomFilterService bloomFilterService;
+
+
     public String generateActivationToken() {
         return UUID.randomUUID().toString();
     }
@@ -56,7 +60,7 @@ public class UserService implements IUserService {
     public List<User> findAll() throws AccessDeniedException {
         return userRepository.findAll();
     }
-
+/*
     @Override
     public User save(UserDTO userRequest) {
         User u = new User();
@@ -77,13 +81,7 @@ public class UserService implements IUserService {
         u.setActivationToken(userRequest.getActivationToken());
         u.setRole(UserRole.USER);
         // u primeru se registruju samo obicni korisnici i u skladu sa tim im se i dodeljuje samo rola USER
-     /*   u.setRoles(Collections.singleton(UserRole.USER));
-        if (u.getRoles() == null || u.getRoles().isEmpty()) {
-            u.setRoles(Set.of(UserRole.USER)); // Primer za dodeljivanje jedne podrazumevane uloge
 
-        u.setRoles(new HashSet<>(Arrays.asList(UserRole.USER)));
-
-        }*/
         Address address = new Address();
         address.setStreet(userRequest.getStreet());
         address.setNumber(userRequest.getNumber());
@@ -95,7 +93,50 @@ public class UserService implements IUserService {
 
         return this.userRepository.save(u);
     }
+*/
+@Override
+public User save(UserDTO userRequest) {
+    // Provera korisničkog imena pomoću Bloom filtera
+    if (bloomFilterService.mightContain(userRequest.getUsername())) {
+        // Dodatna provera u bazi u slučaju false positive
+        if (userRepository.findByUsername(userRequest.getUsername()) != null) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+    }
 
+    // Kreiranje novog korisnika
+    User u = new User();
+    u.setUsername(userRequest.getUsername());
+
+    // Hesiraj lozinku pre čuvanja
+    u.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+
+    u.setName(userRequest.getName());
+    u.setSurname(userRequest.getSurname());
+    u.setIsActive(userRequest.getIsActive());
+    if (u.getIsActive() == null) {
+        u.setIsActive(false);  // Podrazumevana logika za aktivaciju
+    }
+
+    u.setEmail(userRequest.getEmail());
+    u.setActivationToken(userRequest.getActivationToken());
+    u.setRole(UserRole.USER);  // Postavljanje korisničke role
+
+    Address address = new Address();
+    address.setStreet(userRequest.getStreet());
+    address.setNumber(userRequest.getNumber());
+    address.setCity(userRequest.getCity());
+    address.setPostalCode(userRequest.getPostalCode());
+    address.setCountry(userRequest.getCountry());
+
+    u.setAddress(address);
+
+    // Dodaj korisničko ime u Bloom filter
+    bloomFilterService.addUsername(userRequest.getUsername());
+
+    // Sačuvaj korisnika u bazi
+    return this.userRepository.save(u);
+}
 
     public User save(User user) {return userRepository.save(user);}
 
