@@ -24,7 +24,7 @@ public class NotificationService {
     @Autowired
     private EmailService emailService;
 
-    //@Scheduled(cron = "0 */1 * * * ?")
+    //@Scheduled(cron = "0 /1 * * ?")
     @Scheduled(cron = "0 0 9 * * ?")
     public void sendWeeklyNotifications() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now(ZoneOffset.UTC).minusDays(7).withNano(0);;

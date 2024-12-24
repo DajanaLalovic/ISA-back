@@ -86,7 +86,8 @@ public class AuthenticationController {
             // Generiši JWT token
             String jwt = tokenUtils.generateToken(user.getUsername());
             int expiresIn = tokenUtils.getExpiredIn();
-
+            user.setLastLogin(LocalDateTime.now());
+            userService.updateUser(user);
             return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
 
         } catch (Exception e) {
