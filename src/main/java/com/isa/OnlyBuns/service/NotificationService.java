@@ -27,7 +27,8 @@ public class NotificationService {
     //@Scheduled(cron = "0 */1 * * * ?")
     @Scheduled(cron = "0 0 9 * * ?")
     public void sendWeeklyNotifications() {
-        LocalDateTime sevenDaysAgo = LocalDateTime.now(ZoneOffset.UTC).minusDays(7).withNano(0);;
+        System.out.println(">> sendWeeklyNotifications() triggered!");
+        LocalDateTime sevenDaysAgo = LocalDateTime.now(ZoneOffset.UTC).minusDays(7);
         // Prebroj nove objave u poslednjih 7 dana
         List<User> inactiveUsers = userRepository.findByLastLoginBefore(sevenDaysAgo);
 
@@ -45,7 +46,7 @@ public class NotificationService {
             System.out.println("New posts since last login: " + newPostsCount);
 
             // Pošalji e-mail korisniku samo ako ima novih objava
-            if (newPostsCount > 0) {
+            if (newPostsCount >= 0) {
                 emailService.sendWeeklyStatsEmail(user.getEmail(), user.getUsername(), newPostsCount);
             }
         }
