@@ -1,10 +1,13 @@
 package com.isa.OnlyBuns.controller;
 import com.isa.OnlyBuns.dto.PostDTO;
+import com.isa.OnlyBuns.model.Location;
 import com.isa.OnlyBuns.model.Post;
 import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.service.ImageService;
 import com.isa.OnlyBuns.service.PostService;
 import com.isa.OnlyBuns.service.UserService;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +30,8 @@ public class PostController {
     private UserService userService;
     @Autowired
     private ImageService imageService;
+    @Autowired
+    private MeterRegistry meterRegistry;
 
     @GetMapping(value= "/all")
     public ResponseEntity<List<PostDTO>> getAllPosts(){
@@ -44,7 +49,9 @@ public class PostController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostDTO> addNewPost(@RequestBody PostDTO postDTO, Principal principal) {
         try {
+            Timer.Sample sample = Timer.start(meterRegistry);
             Post savedPost = postService.addNewPost(postDTO, principal.getName());
+            sample.stop(meterRegistry.timer("http_server_request","method","POST","endpoint","/api/posts"));
             return new ResponseEntity<>(new PostDTO(savedPost), HttpStatus.CREATED);
         } catch (IOException e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -85,9 +92,17 @@ public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO, Principa
 
     // Ažuriraj polja opisa, latitude i longitude
     post.setDescription(postDTO.getDescription());
-    post.setLatitude(postDTO.getLatitude());
-    post.setLongitude(postDTO.getLongitude());
+
     post.setCreatedAt(postDTO.getCreatedAt());
+    // Ažuriranje lokacije
+    if (postDTO.getLocation() != null) {
+        if (post.getLocation() == null) {
+            post.setLocation(new Location(postDTO.getLocation().getLatitude(), postDTO.getLocation().getLongitude()));
+        } else {
+            post.getLocation().setLatitude(postDTO.getLocation().getLatitude());
+            post.getLocation().setLongitude(postDTO.getLocation().getLongitude());
+        }
+    }
 
     // Proveri da li korisnik želi da zadrži staru sliku ili je uploadovao novu
     if (postDTO.getImageBase64() != null && !postDTO.getImageBase64().isEmpty()) {

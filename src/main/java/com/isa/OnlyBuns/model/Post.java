@@ -19,11 +19,10 @@ public class Post {
     @Column(nullable = true)
     private String imagePath;
 
-    @Column(nullable = false)
-    private double latitude;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "location_id", referencedColumnName = "id", nullable = false)
+    private Location location;
 
-    @Column(nullable = false)
-    private double longitude;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -52,8 +51,7 @@ public class Post {
     public Post(Integer id,
                 String description,
                 String imagePath,
-                double latitude,
-                double longitude,
+                Location location,
                 LocalDateTime createdAt,
                 long userId,
                 List<Comment> comments,
@@ -64,8 +62,7 @@ public class Post {
         this.id = id;
         this.description = description;
         this.imagePath = imagePath;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.location = location;
         this.createdAt = createdAt;
         this.userId = userId;
         this.comments = comments;
@@ -86,13 +83,10 @@ public class Post {
         return imagePath;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public Location getLocation() {
+        return location;
     }
 
-    public double getLongitude() {
-        return longitude;
-    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -113,12 +107,8 @@ public class Post {
         this.imagePath = imagePath;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
@@ -151,8 +141,7 @@ public class Post {
                 "id=" + id +
                 ", description='" + description + '\'' +
                 ", imagePath='" + imagePath + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
+                ", location=" + location +
                 ", createdAt=" + createdAt +
                 ", userId=" + userId +
                 ", isRemoved=" + isRemoved +

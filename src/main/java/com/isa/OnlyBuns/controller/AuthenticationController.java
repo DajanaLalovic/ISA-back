@@ -1,5 +1,6 @@
 package com.isa.OnlyBuns.controller;
 
+import com.isa.OnlyBuns.config.ActiveUserMetricsConfig;
 import com.isa.OnlyBuns.service.EmailService;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -41,6 +42,10 @@ public class AuthenticationController {
     private IUserService userService;
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ActiveUserMetricsConfig activeUserMetricsConfig;
+
 
     // Prvi endpoint koji pogadja korisnik kada se loguje.
     // Tada zna samo svoje korisnicko ime i lozinku i to prosledjuje na backend.
@@ -88,6 +93,7 @@ public class AuthenticationController {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            activeUserMetricsConfig.userActivity(user.getId().intValue());
             // Kreiranje JWT tokena
             String jwt = tokenUtils.generateToken(user.getUsername());
             int expiresIn = tokenUtils.getExpiredIn();

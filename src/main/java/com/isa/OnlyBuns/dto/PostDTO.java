@@ -9,8 +9,7 @@ public class PostDTO {
     private Integer id;
     private String description;
     private String imagePath;
-    private double latitude;
-    private double longitude;
+    private LocationDTO location;
     private LocalDateTime createdAt;
     private long userId;
     private List<CommentDTO> comments;
@@ -25,8 +24,9 @@ public class PostDTO {
         this.id = post.getId();
         this.description = post.getDescription();
         this.imagePath = post.getImagePath();
-        this.latitude = post.getLatitude();
-        this.longitude = post.getLongitude();
+        if (post.getLocation() != null) {
+            this.location = new LocationDTO(post.getLocation().getLatitude(), post.getLocation().getLongitude());
+        }
         this.createdAt = post.getCreatedAt();
         this.userId = post.getUserId();
         this.isRemoved = post.getIsRemoved();
@@ -43,12 +43,12 @@ public class PostDTO {
     }
 
 
-    public PostDTO(Integer id, String description,String imagePath, double latitude, double longitude, LocalDateTime createdAt, long userId,boolean isRemoved,List<CommentDTO> comments,List<Integer> likes) {
+    public PostDTO(Integer id, String description,String imagePath, LocationDTO location, LocalDateTime createdAt, long userId,boolean isRemoved,List<CommentDTO> comments,List<Integer> likes) {
         this.id = id;
         this.description = description;
-        this.latitude = latitude;
+        this.location = location;
         this.imagePath = imagePath;
-        this.longitude = longitude;
+
         this.createdAt = createdAt;
         this.userId = userId;
         this.isRemoved = isRemoved;
@@ -68,12 +68,12 @@ public class PostDTO {
         return imagePath;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public LocationDTO getLocation() {
+        return location;
     }
 
-    public double getLongitude() {
-        return longitude;
+    public void setLocation(LocationDTO location) {
+        this.location = location;
     }
 
 
@@ -118,8 +118,7 @@ public class PostDTO {
                 "id=" + id +
                 ", description='" + description + '\'' +
                 ", imagePath='" + imagePath + '\'' +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
+                ", location=" + location +
                 ", createdAt=" + createdAt +
                 ", userId=" + userId +
                 ", comments=" + comments +
