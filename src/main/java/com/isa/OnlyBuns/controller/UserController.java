@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.isa.OnlyBuns.enums.UserRole;
 import com.isa.OnlyBuns.model.User;
+import com.isa.OnlyBuns.service.BloomFilterService;
 import com.isa.OnlyBuns.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,8 @@ public class UserController {
 
     @Autowired
     private IUserService userService;
+    @Autowired
+    private BloomFilterService bloomFilterService;
 
     // Za pristup ovoj metodi neophodno je da ulogovani korisnik ima ADMIN ulogu
     // Ukoliko nema, server ce vratiti gresku 403 Forbidden
@@ -78,15 +81,24 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public User findByUsername(@PathVariable String username) {return this.userService.findByUsername(username);}
 
-    @GetMapping("/check-by-username/{username}")
-    public ResponseEntity<User> checkUsername(@PathVariable String username) {
-        User user = this.userService.findByUsername(username);
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-    }
+   @GetMapping("/check-by-username/{username}")
+   public ResponseEntity<?> checkUsername(@PathVariable String username) {
+       // Prvo proveri Bloom filter
+       if (bloomFilterService.mightContain(username)) {
+           // Ako filter kaže da možda postoji, uradi dodatnu proveru u bazi zbog mogućih false positive
+           User user = this.userService.findByUsername(username);
+           if (user != null) {
+               return ResponseEntity.ok(user);
+           } else {
+               // Bloom filter je false positive, username nije u bazi
+               return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+           }
+       } else {
+           // Filter kaže da sigurno ne postoji - ne proveravaj bazu
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+       }
+   }
+
 
     @GetMapping("/user-whoami")
     @PreAuthorize("isAuthenticated()")
@@ -193,7 +205,24 @@ public ResponseEntity<List<User>> searchUsers(
 
 
 
-
+    @GetMapping("/{userId}/followers")
+    public ResponseEntity<List<User>> getFollowers(@PathVariable Long userId) {
+        try {
+            List<User> followers = userService.getFollowers(userId);
+            return ResponseEntity.ok(followers);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+    @GetMapping("/{userId}/following")
+    public ResponseEntity<List<User>> getFollowing(@PathVariable Long userId) {
+        try {
+            List<User> following = userService.getFollowing(userId);
+            return ResponseEntity.ok(following);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
 
 
 }

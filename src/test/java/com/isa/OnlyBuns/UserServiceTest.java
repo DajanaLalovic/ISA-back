@@ -124,7 +124,7 @@ public class UserServiceTest {
     public void cleanup() {
         User user = userService.findByUsername("testuser");
         if (user != null) {
-            userService.deleteUserById(user.getId()); // Pretpostavljamo da postoji metoda deleteUserById
+            userService.deleteUserById(user.getId());
         }
     }
 }

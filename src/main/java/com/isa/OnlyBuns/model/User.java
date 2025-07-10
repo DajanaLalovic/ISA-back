@@ -228,6 +228,9 @@ public class User implements UserDetails, Serializable {
     public void setFollowing(Set<User> following) { this.following = following; }
     public Set<User> getFollowers() { return followers; }
 
+
+
+
     public void setFollowers(Set<User> followers) { this.followers = followers;}
     public Long getFollowersCount() { return followersCount; }
     public void setFollowersCount(Long followersCount) {this.followersCount = followersCount; }
