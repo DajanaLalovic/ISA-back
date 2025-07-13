@@ -1,5 +1,6 @@
 package com.isa.OnlyBuns.controller;
 
+import com.isa.OnlyBuns.config.ActiveUserMetricsConfig;
 import com.isa.OnlyBuns.service.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,6 +45,8 @@ public class AuthenticationController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private ActiveUserMetricsConfig activeUserMetricsConfig;
 
     private static final int MAX_ATTEMPTS = 5;
     private static final long TIME_WINDOW_MS = 60 * 1000; // 1 minute
@@ -79,7 +82,7 @@ public class AuthenticationController {
                     new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            activeUserMetricsConfig.userActivity(user.getId().intValue());
             // Uspešan login - resetuj pokušaje za IP
             resetAttempts(clientIp);
 
@@ -154,42 +157,6 @@ public class AuthenticationController {
     }
 
 
-    /*@PostMapping("/login")
-    public ResponseEntity<?> createAuthenticationToken(
-            @RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletResponse response) {
-        try {
-            // Prvo proveravamo da li korisnik postoji
-            User user = userService.findByUsername(authenticationRequest.getUsername());
-
-            // Ako korisnik ne postoji
-            if (user == null) {
-                return new ResponseEntity<>("User not found", HttpStatus.BAD_REQUEST);
-            }
-
-            // Proveravamo da li je korisnik aktiviran
-            if (!user.getIsActive()) {
-                return new ResponseEntity<>("Your account isn't activated yet. Check your mail.", HttpStatus.FORBIDDEN);
-            }
-
-            // Ako je sve u redu sa korisničkim nalogom, pokušavamo autentifikaciju
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(), authenticationRequest.getPassword()));
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Kreiranje JWT tokena
-            String jwt = tokenUtils.generateToken(user.getUsername());
-            int expiresIn = tokenUtils.getExpiredIn();
-            user.setLastLogin(LocalDateTime.now());
-            userService.updateUser(user); // Poziv metode za ažuriranje korisnika
-
-            return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
-
-        } catch (Exception e) {
-            return new ResponseEntity<>("Login failed", HttpStatus.UNAUTHORIZED);
-        }
-    }
-*/
 
     @PostMapping("/signup")
     public ResponseEntity<UserTokenState> addUser(@RequestBody UserDTO userRequest, UriComponentsBuilder ucBuilder) {
@@ -242,5 +209,6 @@ public class AuthenticationController {
 
         return new ResponseEntity<>("Account activated successfully", HttpStatus.OK);
     }
+
 
 }

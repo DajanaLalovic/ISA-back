@@ -9,6 +9,8 @@ import com.isa.OnlyBuns.iservice.IRoleService;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.model.Address;
 import com.isa.OnlyBuns.model.User;
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,7 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+//import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
@@ -321,7 +323,6 @@ public User save(UserDTO userRequest) {
         save(currentUser);
         save(userToFollow);
     }
-
 
     //otpracivanje
     public void unfollowUser(Long userId, String currentUsername) {

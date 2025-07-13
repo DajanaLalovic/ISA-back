@@ -17,6 +17,9 @@ public interface IUserRepository extends JpaRepository<User, Long> {
     void deleteById(Long id);
     List<User> findByLastLoginBefore(LocalDateTime date);
     User deleteUserByUsername(String username);
+    List<User> findFollowingById(Long id);
+    List<User> findByFollowers_IdAndLastLoginAfter(Long userId, LocalDateTime startTime);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM User u WHERE u.id = :id")
     User findByIdWithLock(@Param("id") Long id);

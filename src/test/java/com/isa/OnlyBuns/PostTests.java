@@ -1,6 +1,7 @@
 package com.isa.OnlyBuns;
 
 import com.isa.OnlyBuns.irepository.IPostRepository;
+import com.isa.OnlyBuns.model.Location;
 import com.isa.OnlyBuns.model.Post;
 import com.isa.OnlyBuns.service.PostService;
 import org.junit.jupiter.api.Test;
@@ -31,8 +32,7 @@ public class PostTests {
     void testConcurrentLikesWithPessimisticLock() throws Throwable {
         Post post = new Post();
         post.setDescription("Test post");
-        post.setLatitude(45.2671);
-        post.setLongitude(19.8335);
+        post.setLocation(new Location(45.2671, 19.8335));
         post.setCreatedAt(LocalDateTime.now());
         post.setUserId(1L);
         post.setImagePath("test-image.jpg");
@@ -67,8 +67,7 @@ public class PostTests {
         // Kreiraj testnu objavu
         Post post = new Post();
         post.setDescription("Test post");
-        post.setLatitude(45.2671);
-        post.setLongitude(19.8335);
+        post.setLocation(new Location(45.2671, 19.8335));
         post.setCreatedAt(LocalDateTime.now());
         post.setUserId(1L);
         post.setImagePath("test-image.jpg");

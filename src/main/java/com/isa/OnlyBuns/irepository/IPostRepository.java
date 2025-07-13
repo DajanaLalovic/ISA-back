@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -18,19 +20,11 @@ import org.springframework.data.jpa.repository.Query;
 public interface IPostRepository extends JpaRepository<Post, Integer> {
 
 
-    public Post findByDescription(String description);
-
     public Page<Post> findAll(Pageable pageable);
-
-    public List<Post> findPostByDescription(String description);
-
     Long countByUserId(Long userId);
-
+    int countByCreatedAtAfter(LocalDateTime startTime);
     List<Post> findByUserIdInOrderByCreatedAtDesc(List<Long> userIds);
-
-
     long count();
-    int countByCreatedAtAfter(LocalDateTime date); //arijanina
 
     @Query("SELECT p FROM Post p WHERE p.createdAt > :sevenDaysAgo ORDER BY SIZE(p.likes) DESC")
     List<Post> findTop5MostLikedPostsLast7Days(@Param("sevenDaysAgo") LocalDateTime sevenDaysAgo, Pageable pageable);
@@ -47,5 +41,7 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
     List<Comment> findAllCommentsByPostId(@Param("postId") Long postId);
     @Query("SELECT DISTINCT p.userId FROM Post p")
     List<Long> findDistinctUserIds();
+    @Query("SELECT COUNT(l) FROM Post p JOIN p.likes l WHERE p.userId IN :followedUserIds AND p.createdAt > :since")
+    int countNewLikesForFollowedUsers(@Param("followedUserIds") Set<Long> followedUserIds, @Param("since") LocalDateTime since);
 
     }

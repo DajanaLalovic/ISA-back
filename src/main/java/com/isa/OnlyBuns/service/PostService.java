@@ -4,6 +4,7 @@ import com.isa.OnlyBuns.irepository.IPostLikeRepository;
 import com.isa.OnlyBuns.irepository.IPostRepository;
 import com.isa.OnlyBuns.irepository.IUserRepository;
 import com.isa.OnlyBuns.iservice.IPostService;
+import com.isa.OnlyBuns.model.Location;
 import com.isa.OnlyBuns.model.PostLike;
 import com.isa.OnlyBuns.model.User;
 import org.slf4j.Logger;
@@ -18,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.isa.OnlyBuns.model.Post;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -62,16 +62,25 @@ public class PostService implements IPostService {
 
         existingPost.setDescription(postDTO.getDescription());
         existingPost.setImagePath(postDTO.getImagePath());
-        existingPost.setLatitude(postDTO.getLatitude());
-        existingPost.setLongitude(postDTO.getLongitude());
+
         existingPost.setCreatedAt(postDTO.getCreatedAt());
         existingPost.setUserId(postDTO.getUserId());
+        if (postDTO.getLocation() != null) {
+            if (existingPost.getLocation() == null) {
+                existingPost.setLocation(new Location(postDTO.getLocation().getLatitude(), postDTO.getLocation().getLongitude()));
+            } else {
+                existingPost.getLocation().setLatitude(postDTO.getLocation().getLatitude());
+                existingPost.getLocation().setLongitude(postDTO.getLocation().getLongitude());
+            }
+        }
 
         return postRepository.save(existingPost);
     }
+
     public void remove(Integer id) {
         postRepository.deleteById(id);
     }
+
 
     public void deleteLogically(Integer id) {
         Post post = postRepository.findById(id).orElse(null);
@@ -119,10 +128,12 @@ public class PostService implements IPostService {
 
         Post post = new Post();
         post.setDescription(postDTO.getDescription());
-        post.setLatitude(postDTO.getLatitude());
-        post.setLongitude(postDTO.getLongitude());
+
         post.setCreatedAt(LocalDateTime.now());
         post.setUserId(currentUser.getId());
+        if (postDTO.getLocation() != null) {
+            post.setLocation(new Location(postDTO.getLocation().getLatitude(), postDTO.getLocation().getLongitude()));
+        }
 
         // Validacija i čuvanje slike ako je dostupna
         if (postDTO.getImageBase64() != null && !postDTO.getImageBase64().isEmpty()) {
@@ -149,7 +160,6 @@ public class PostService implements IPostService {
         // Pretraga objava po ID-evima korisnika
         return postRepository.findByUserIdInOrderByCreatedAtDesc(followedUserIds);
     }
-
     @Cacheable("totalPosts")
     public long getTotalPosts() {
         return postRepository.count();
@@ -170,12 +180,10 @@ public class PostService implements IPostService {
         Pageable pageable = PageRequest.of(0, 10); // Ograničavamo na 10 objava
         return postRepository.findTop10MostLikedPosts(pageable);
     }
-
     public int getPostsCountByUser(String username){
         User currentUser = userService.findByUsername(username);
         List<Post> allPosts=postRepository.getAllByUserId(currentUser.getId());
         return allPosts.size();
     }
-
 
 }
