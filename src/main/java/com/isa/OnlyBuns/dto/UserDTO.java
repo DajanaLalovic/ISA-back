@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 public class UserDTO {
     private Long id;
     private String name;
@@ -24,12 +23,12 @@ public class UserDTO {
     private String country;
     private Long postCount;
     private Long followingCount;
+    private Long followersCount;
     private LocalDateTime lastLogin;
     private String role; // Dodajte polje za ulogu korisnika
     private LocalDateTime activationSentAt;
     private Set<Long> following = new HashSet<>();
     private Set<Long> followers = new HashSet<>();
-
 
     public UserDTO() {
         this.postCount = 0L;
@@ -49,15 +48,15 @@ public class UserDTO {
         }
         this.postCount = user.getPostCount();
         this.followingCount = user.getFollowingCount();
+        this.followersCount= user.getFollowersCount();
         this.role = user.getRole().toString(); // Pretvorite `UserRole` u string
         this.lastLogin = user.getLastLogin();
         this.activationSentAt=user.getActivationSentAt();
         this.following=user.getFollowing().stream().map(User::getId).collect(Collectors.toSet());
         this.followers=user.getFollowers().stream().map(User::getId).collect(Collectors.toSet());
-
     }
 
-    public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country, Long postCount, Long followingCount,LocalDateTime activationSentAt,Set<Long> following,Set<Long> followers) {
+    public UserDTO(Long id, String username, Boolean active, String street, String number, String city, String postalCode, String country, Long postCount, Long followingCount,LocalDateTime activationSentAt,Set<Long> following,Set<Long> followers,Long followersCount) {
         this.id = id;
         this.username = username;
         this.active = active;
@@ -71,6 +70,7 @@ public class UserDTO {
         this.activationSentAt=activationSentAt;
         this.following=following;
         this.followers=followers;
+        this.followersCount=followersCount;
     }
 
     public LocalDateTime getLastLogin() {
@@ -193,5 +193,9 @@ public class UserDTO {
 
     public Set<Long> getFollowers(){return followers;}
     public void setFollowers(Set<Long> followers){this.followers=followers;}
+
+    public Long getFollowersCount(){return followersCount;}
+    public void setFollowersCount(Long followersCount){this.followersCount=followersCount;}
+
 }
 

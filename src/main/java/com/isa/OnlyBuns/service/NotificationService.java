@@ -34,7 +34,7 @@ public class NotificationService {
     private ICommentRepository commentRepository;
 
 
-   // @Scheduled(cron = "0 0 9 * * ?")
+    // @Scheduled(cron = "0 0 9 * * ?")
     @Transactional(readOnly = true)
     @Scheduled(cron = "0 */1 * * * ?")
     public void sendWeeklyNotifications() {
@@ -73,7 +73,7 @@ public class NotificationService {
             System.out.println("New likes on followed users' posts: " + newLikesCount);
             System.out.println("New comments on followed users' posts: " + newCommentsCount);
 
-           if (newPostsCount > 0) {
+            if (newPostsCount > 0) {
                 emailService.sendWeeklyStatsEmail(user.getEmail(), user.getUsername(), newPostsCount, newLikesCount, newCommentsCount);
             }
         }

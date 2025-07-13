@@ -17,6 +17,9 @@ public interface IUserService {
     User findByActivationToken(String activationToken);
     void updateUser(User user);
     List<User> findUsersByLastLoginBefore(LocalDateTime date);
+    void updatePassword(Long userId, String newPassword);
+    User registerUser(User user);
+    public void deleteUserById(Long id);
     List<User> searchUsers(String name, String surname, String email, Long minPostCount, Long maxPostCount, String sortBy, String sortOrder,int page,int size) ;
     void scheduledCleanUp();
     void deleteInactiveAccounts();
@@ -24,5 +27,6 @@ public interface IUserService {
     void unfollowUser(Long userId, String currentUsername);
     void followUser(Long userId,String currentUsername);
     boolean isFollowing(Long targetUserId, String username);
-
+    List<User> getFollowers(Long userId);
+    List<User> getFollowing(Long userId) ;
 }

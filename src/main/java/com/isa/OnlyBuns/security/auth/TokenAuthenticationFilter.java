@@ -39,7 +39,6 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-
         String username;
 
         // 1. Preuzimanje JWT tokena iz zahteva

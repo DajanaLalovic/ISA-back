@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class Post {
@@ -144,6 +146,7 @@ public class Post {
     public void setAdApproved(Boolean adApproved) {
         this.adApproved = adApproved;
     }
+
 
 
     @Override

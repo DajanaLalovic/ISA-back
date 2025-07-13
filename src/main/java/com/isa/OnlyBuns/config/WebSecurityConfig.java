@@ -72,11 +72,11 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/images/**").permitAll() // Dopuštamo pristup slikama
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/socket/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/getOneUser/**").permitAll()
                         .requestMatchers("/api/locations/**").permitAll()
                         .anyRequest().authenticated() // Sve ostale zahteve traži autentifikacija
-
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService()), BasicAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider());
@@ -98,6 +98,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/posts/all")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "api/getOneUser/{id}")
                 .requestMatchers(HttpMethod.GET, "api/check-by-username/{username}")
+                .requestMatchers("/socket/**")
 
 
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",

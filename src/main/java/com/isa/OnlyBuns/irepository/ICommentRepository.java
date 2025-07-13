@@ -25,4 +25,7 @@ public interface ICommentRepository extends JpaRepository<Comment, Integer> {
     int countByUserIdAndCreatedAtAfter(long userId, LocalDateTime startTime);
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.post.userId IN :followedUserIds AND c.createdAt > :since")
     int countNewCommentsForFollowedUsers(@Param("followedUserIds") Set<Long> followedUserIds, @Param("since") LocalDateTime since);
+    @Query("SELECT DISTINCT c.userId FROM Comment c")
+    List<Long> findDistinctUserIds();
+
 }

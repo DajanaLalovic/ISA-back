@@ -8,20 +8,20 @@ import com.isa.OnlyBuns.iservice.IPostService;
 import com.isa.OnlyBuns.iservice.IRoleService;
 import com.isa.OnlyBuns.iservice.IUserService;
 import com.isa.OnlyBuns.model.Address;
-import com.isa.OnlyBuns.model.Role;
 import com.isa.OnlyBuns.model.User;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Service;
+//import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -42,12 +42,17 @@ public class UserService implements IUserService {
     @Autowired
     private IRoleService roleService;
 
+    @Autowired
+    private BloomFilterService bloomFilterService;
+
+
     public String generateActivationToken() {
         return UUID.randomUUID().toString();
     }
     private final Map<String, RateLimiter> userFollowLimits = new ConcurrentHashMap<>();
 
     private static final int FOLLOW_LIMIT = 3;
+    //    private static final int FOLLOW_LIMIT = 50;-inace
     private static class RateLimiter {
         private AtomicInteger followCount = new AtomicInteger(0);
         private long lastResetTime = System.currentTimeMillis();
@@ -79,7 +84,7 @@ public class UserService implements IUserService {
     public List<User> findAll() throws AccessDeniedException {
         return userRepository.findAll();
     }
-
+/*
     @Override
     public User save(UserDTO userRequest) {
         User u = new User();
@@ -100,13 +105,7 @@ public class UserService implements IUserService {
         u.setActivationToken(userRequest.getActivationToken());
         u.setRole(UserRole.USER);
         // u primeru se registruju samo obicni korisnici i u skladu sa tim im se i dodeljuje samo rola USER
-     /*   u.setRoles(Collections.singleton(UserRole.USER));
-        if (u.getRoles() == null || u.getRoles().isEmpty()) {
-            u.setRoles(Set.of(UserRole.USER)); // Primer za dodeljivanje jedne podrazumevane uloge
 
-        u.setRoles(new HashSet<>(Arrays.asList(UserRole.USER)));
-
-        }*/
         Address address = new Address();
         address.setStreet(userRequest.getStreet());
         address.setNumber(userRequest.getNumber());
@@ -114,10 +113,72 @@ public class UserService implements IUserService {
         address.setPostalCode(userRequest.getPostalCode());
         address.setCountry(userRequest.getCountry());
         u.setActivationSentAt(userRequest.getActivationSentAt());
+        u.setFollowersCount(userRequest.getFollowersCount());
         u.setAddress(address);
 
         return this.userRepository.save(u);
     }
+*/
+@Override
+public User save(UserDTO userRequest) {
+  /*  // Provera korisničkog imena pomoću Bloom filtera
+    if (bloomFilterService.mightContain(userRequest.getUsername())) {
+        // Dodatna provera u bazi u slučaju false positive
+        throw new IllegalArgumentException("Username already exists in bloom.");
+
+    }else{
+        if (userRepository.findByUsername(userRequest.getUsername()) != null) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+
+    }*/
+        boolean mightContain = bloomFilterService.mightContain(userRequest.getUsername());
+
+        if (mightContain) {
+            throw new IllegalArgumentException("Username already exists in bloom.");
+        } else {
+            boolean userExists = userRepository.findByUsername(userRequest.getUsername()) != null;
+
+            if (userExists) {
+                throw new IllegalArgumentException("Username already exists.");
+            }
+        }
+    // Kreiranje novog korisnika
+    User u = new User();
+    u.setUsername(userRequest.getUsername());
+
+    // Hesiraj lozinku pre čuvanja
+    u.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+
+    u.setName(userRequest.getName());
+    u.setSurname(userRequest.getSurname());
+    u.setIsActive(userRequest.getIsActive());
+    if (u.getIsActive() == null) {
+        u.setIsActive(false);  // Podrazumevana logika za aktivaciju
+    }
+
+    u.setEmail(userRequest.getEmail());
+    u.setActivationToken(userRequest.getActivationToken());
+    u.setRole(UserRole.USER);  // Postavljanje korisničke role
+    u.setFollowersCount(0L);
+    u.setFollowingCount(0L);
+    u.setLastLogin(null);
+
+    Address address = new Address();
+    address.setStreet(userRequest.getStreet());
+    address.setNumber(userRequest.getNumber());
+    address.setCity(userRequest.getCity());
+    address.setPostalCode(userRequest.getPostalCode());
+    address.setCountry(userRequest.getCountry());
+
+    u.setAddress(address);
+
+    // Dodaj korisničko ime u Bloom filter
+    bloomFilterService.addUsername(userRequest.getUsername());
+
+    // Sačuvaj korisnika u bazi
+    return this.userRepository.save(u);
+}
 
 
     public User save(User user) {return userRepository.save(user);}
@@ -145,7 +206,7 @@ public class UserService implements IUserService {
         userDTO.setIsActive(user.getIsActive());  // Ako je ovo potrebno u DTO
         userDTO.setActivationToken(user.getActivationToken());
         userDTO.setFollowingCount(user.getFollowingCount());
-        userDTO.setPostCount(user.getPostCount());
+       // userDTO.setPostCount(user.getPostCount());
         userDTO.setActivationSentAt(user.getActivationSentAt());
         return userDTO;
     }
@@ -236,23 +297,28 @@ public class UserService implements IUserService {
 
     //pracenje
     @Transactional
-    public void followUser(Long userId,String currentUsername){
-        User currentUser=findByUsername(currentUsername);
-        User userToFollow=findById(userId);
+    public void followUser(Long userId, String currentUsername) {
+        User currentUser = findByUsername(currentUsername);
+        User userToFollow = userRepository.findByIdWithLock(userId); // zakljucavanje-za konkurentno
 
-        if(currentUser.equals(userToFollow)){
+        if (currentUser.equals(userToFollow)) {
             throw new IllegalArgumentException("You cannot follow yourself.");
         }
         if (currentUser.getFollowing().contains(userToFollow)) {
             throw new IllegalArgumentException("You are already following this user.");
         }
-        //limiter na 3 pracenja po minuti
+
+        // limiter na 3 pracenja po minuti
         userFollowLimits.putIfAbsent(currentUsername, new RateLimiter());
         if (!userFollowLimits.get(currentUsername).canFollow()) {
             throw new IllegalArgumentException("Follow limit exceeded. Please wait a minute.");
         }
+
         currentUser.getFollowing().add(userToFollow);
         userToFollow.getFollowers().add(currentUser);
+
+        currentUser.setFollowingCount((long) currentUser.getFollowing().size());
+        userToFollow.setFollowersCount((long) userToFollow.getFollowers().size());
 
         save(currentUser);
         save(userToFollow);
@@ -270,6 +336,9 @@ public class UserService implements IUserService {
         currentUser.getFollowing().remove(userToUnfollow);
         userToUnfollow.getFollowers().remove(currentUser);
 
+        currentUser.setFollowingCount((long) currentUser.getFollowing().size());
+        userToUnfollow.setFollowersCount((long) userToUnfollow.getFollowers().size());
+
         save(currentUser);
         save(userToUnfollow);
     }
@@ -281,6 +350,75 @@ public class UserService implements IUserService {
     }
 
 
+    public void updatePassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+   @Transactional
+   public User registerUser(User user) {
+       try {
+           System.out.println("Saving user: " + user.getUsername());
+           User savedUser = userRepository.saveAndFlush(user);
+           System.out.println("User saved: " + savedUser.getUsername());
+           return savedUser;
+       } catch (DataIntegrityViolationException e) {
+           System.out.println("Failed to save user: " + user.getUsername() + " - Username already exists.");
+           throw new IllegalArgumentException("Username already exists.");
+       }
+   }
+
+
+    @Transactional
+    @Override
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public List<User> getFollowers(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Postavljamo prazne liste za followers i following
+        for (User follower : user.getFollowers()) {
+            follower.setFollowers(new HashSet<>());  // Prazna lista followers
+            follower.setFollowing(new HashSet<>());  // Prazna lista following
+        }
+
+        return new ArrayList<>(user.getFollowers());  // Vraćamo listu followera sa praznim listama
+    }
+
+    public List<User> getFollowing(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Postavljamo prazne liste za followers i following
+        for (User followedUser : user.getFollowing()) {
+            followedUser.setFollowers(new HashSet<>());  // Prazna lista followers
+            followedUser.setFollowing(new HashSet<>());  // Prazna lista following
+        }
+
+        return new ArrayList<>(user.getFollowing());  // Vraćamo listu following sa praznim listama
+    }
+
+
+//    public List<User> getFollowers(Long userId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+//        return new ArrayList<>(user.getFollowers());
+//    }
+//
+//
+//    public List<User> getFollowing(Long userId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+//        return new ArrayList<>(user.getFollowing());
+//    }
+
 }
+
 
 
