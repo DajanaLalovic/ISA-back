@@ -20,6 +20,8 @@ public interface ICommentRepository extends JpaRepository<Comment, Integer> {
 
     public Comment findById(int id);
     List<Comment> findByPostIdOrderByCreatedAtDesc(Integer postId);
-
     int countByUserIdAndCreatedAtAfter(long userId, LocalDateTime startTime);
+    @Query("SELECT DISTINCT c.userId FROM Comment c")
+    List<Long> findDistinctUserIds();
+
 }

@@ -171,5 +171,11 @@ public class PostService implements IPostService {
         return postRepository.findTop10MostLikedPosts(pageable);
     }
 
+    public int getPostsCountByUser(String username){
+        User currentUser = userService.findByUsername(username);
+        List<Post> allPosts=postRepository.getAllByUserId(currentUser.getId());
+        return allPosts.size();
+    }
+
 
 }

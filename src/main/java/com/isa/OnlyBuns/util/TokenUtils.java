@@ -252,6 +252,15 @@ public class TokenUtils {
                 ); // nakon kreiranja tokena korisnik nije menjao svoju lozinku
     }
 
+    public boolean validateToken(String token) {
+        try {
+            Claims claims = getAllClaimsFromToken(token);
+            return claims.getSubject() != null && claims.getExpiration().after(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /**
      * Funkcija proverava da li je lozinka korisnika izmenjena nakon izdavanja tokena.
      *

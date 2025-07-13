@@ -1,5 +1,6 @@
 package com.isa.OnlyBuns.irepository;
 
+import com.isa.OnlyBuns.model.Comment;
 import com.isa.OnlyBuns.model.Post;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.QueryHint;
@@ -40,4 +41,11 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
     @Query("SELECT p FROM Post p WHERE p.id = :id")
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value ="0")})
     Post findPostForUpdate(@Param("id") Integer id);
-}
+
+    List<Post> getAllByUserId(Long id);
+    @Query("SELECT p.comments FROM Post p WHERE p.id = :postId")
+    List<Comment> findAllCommentsByPostId(@Param("postId") Long postId);
+    @Query("SELECT DISTINCT p.userId FROM Post p")
+    List<Long> findDistinctUserIds();
+
+    }
