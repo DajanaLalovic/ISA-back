@@ -67,7 +67,14 @@ public class User implements UserDetails, Serializable {
     @Column(name = "activation_sent_at")
     private LocalDateTime activationSentAt; // Vreme kada je poslat aktivacioni mejl
 
-
+    //grupe za cetovanje
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_groups",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id")
+    )
+    private Set<Group> groups = new HashSet<>(); //grupe gde je korisnik clan -ne nzam da li ce mi trebati to?
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.DETACH})
     @JoinTable(
             name = "user_following",
@@ -232,6 +239,8 @@ public class User implements UserDetails, Serializable {
     public Long getFollowersCount() { return followersCount; }
     public void setFollowersCount(Long followersCount) {this.followersCount = followersCount; }
 
+    public Set<Group> getGroups(){return groups;}
+    public void setGroups(Set<Group> groups){this.groups = groups;}
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(role.name()));

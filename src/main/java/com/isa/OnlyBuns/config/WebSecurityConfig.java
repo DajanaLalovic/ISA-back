@@ -71,6 +71,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(HttpMethod.GET, "/images/**").permitAll() // Dopuštamo pristup slikama
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/socket/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/getOneUser/**").permitAll()
                         .anyRequest().authenticated() // Sve ostale zahteve traži autentifikacija
@@ -95,6 +96,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/posts/all")// Allow POST requests for signup
                 .requestMatchers(HttpMethod.GET, "api/getOneUser/{id}")
                 .requestMatchers(HttpMethod.GET, "api/check-by-username/{username}")
+                .requestMatchers("/socket/**")
 
 
                 .requestMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html", "favicon.ico",
