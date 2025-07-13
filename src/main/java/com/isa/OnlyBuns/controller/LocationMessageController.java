@@ -1,0 +1,29 @@
+package com.isa.OnlyBuns.controller;
+
+import com.isa.OnlyBuns.model.LocationMessage;
+import com.isa.OnlyBuns.service.LocationMessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+@RestController
+@RequestMapping(value = "/api", produces = MediaType.APPLICATION_JSON_VALUE)
+public class LocationMessageController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private LocationMessageService locationMessageService;
+
+    @GetMapping("/locationMessage/all")
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
+    public List<LocationMessage> loadAll() {
+        return this.locationMessageService.findAll();
+    }
+}

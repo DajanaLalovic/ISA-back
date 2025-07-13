@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class Post {
@@ -16,7 +18,7 @@ public class Post {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String imagePath;
 
     @Column(nullable = false)
@@ -35,13 +37,14 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "post_likes")
     @Column(name = "user_id")
     private List<Integer> likes= new ArrayList<>();
 
     @Column(name = "is_removed")
     private Boolean isRemoved;
+
 
     public Post() {
         this.comments = new ArrayList<>();
@@ -143,6 +146,8 @@ public class Post {
     public void setLikes(List<Integer> likes) {
         this.likes = likes;
     }
+
+
 
     @Override
     public String toString() {

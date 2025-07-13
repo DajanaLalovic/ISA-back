@@ -21,7 +21,7 @@ public class WebConfig {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:8081") // Dodaj adresu svog frontend servera
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
+                        .exposedHeaders("X-Total-Count")
                         .allowCredentials(true);
             }
 

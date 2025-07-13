@@ -18,4 +18,23 @@ public class EmailService {
         message.setText("Please click the following link to activate your account: " + activationLink);
         javaMailSender.send(message);
     }
+
+
+    // Nova metoda za slanje obaveštenja o novim objavama
+    public void sendWeeklyStatsEmail(String toEmail, String username, int newPostsCount) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Vaša nedeljna statistika");
+
+        String emailText = String.format(
+                "Pozdrav %s,\n\nPrimijetili smo da niste posjetili našu platformu u posljednjih 7 dana. " +
+                        "U međuvremenu, naši korisnici su kreirali %d novih objava!\n\n" +
+                        "Prijavite se sada i provjerite najnovije objave i sadržaj koji vas čeka.\n\n" +
+                        "Srdačan pozdrav,\nOnlyBuns tim",
+                username, newPostsCount
+        );
+
+        message.setText(emailText);
+        javaMailSender.send(message);
+    }
 }
