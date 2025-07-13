@@ -20,21 +20,26 @@ public class EmailService {
     }
 
 
-    // Nova metoda za slanje obaveštenja o novim objavama
-    public void sendWeeklyStatsEmail(String toEmail, String username, int newPostsCount) {
+    public void sendWeeklyStatsEmail(String toEmail, String username, int newPostsCount, int newLikesCount, int newCommentsCount) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Vaša nedeljna statistika");
 
         String emailText = String.format(
                 "Pozdrav %s,\n\nPrimijetili smo da niste posjetili našu platformu u posljednjih 7 dana. " +
-                        "U međuvremenu, naši korisnici su kreirali %d novih objava!\n\n" +
-                        "Prijavite se sada i provjerite najnovije objave i sadržaj koji vas čeka.\n\n" +
+                        "Evo šta se desilo u međuvremenu:\n\n" +
+                        "- %d novih objava od korisnika koje pratite.\n" +
+                        "- %d novih lajkova na njihovim objavama.\n" +
+                        "- %d novih komentara na njihovim objavama.\n\n" +
+                        "Prijavite se sada i provjerite najnoviji sadržaj koji vas čeka!\n\n" +
                         "Srdačan pozdrav,\nOnlyBuns tim",
-                username, newPostsCount
+                username, newPostsCount, newLikesCount, newCommentsCount
         );
 
         message.setText(emailText);
         javaMailSender.send(message);
     }
+
+
+
 }

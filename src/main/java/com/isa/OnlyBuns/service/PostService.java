@@ -14,11 +14,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.isa.OnlyBuns.model.Post;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.stream.Collectors;
 
 
@@ -36,6 +36,7 @@ public class PostService implements IPostService {
     @Lazy
     private UserService userService;
 
+
     public Post findOne(Integer id){return postRepository.findById(id).orElseGet(null);}
 
     public List<Post>  findAll(){return postRepository.findAll();}
@@ -45,6 +46,7 @@ public class PostService implements IPostService {
     public Post save(Post post){return postRepository.save(post);}
 
     public void delete(Integer id){postRepository.deleteById(id);}
+
 
     public Post updatePost(Integer id, PostDTO postDTO) {
         Post existingPost = postRepository.findById(id).orElse(null);
@@ -68,9 +70,11 @@ public class PostService implements IPostService {
 
         return postRepository.save(existingPost);
     }
+
     public void remove(Integer id) {
         postRepository.deleteById(id);
     }
+
 
     public void deleteLogically(Integer id) {
         Post post = postRepository.findById(id).orElse(null);
@@ -134,7 +138,11 @@ public class PostService implements IPostService {
         post.setComments(new ArrayList<>());
         post.setLikes(new ArrayList<>());
 
-        return postRepository.save(post);
+        post = postRepository.save(post); // ✅ Sada post ima ID
+
+
+
+        return post;
     }
 
     public List<Post> getPostsByFollowedUsers(String username) {
@@ -149,6 +157,6 @@ public class PostService implements IPostService {
     }
 
 
+    }
 
 
-}

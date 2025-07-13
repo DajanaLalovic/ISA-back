@@ -43,7 +43,7 @@ public class ImageService
     }
 
 
-   // @Scheduled(cron = "0 * * * * *") // Pokreće se svakog minuta za testiranje
+    //@Scheduled(cron = "0 * * * * *") // Pokreće se svakog minuta za testiranje
     @Scheduled(cron = "0 0 0 * * *")  // Pokreće se svakog dana u ponoć
     public void compressOldImages() throws IOException {
         Path imagesPath = Paths.get(uploadDir, "images");

@@ -3,6 +3,7 @@ import com.isa.OnlyBuns.dto.PostDTO;
 import com.isa.OnlyBuns.model.Location;
 import com.isa.OnlyBuns.model.Post;
 import com.isa.OnlyBuns.model.User;
+import com.isa.OnlyBuns.service.AdvertisingService;
 import com.isa.OnlyBuns.service.ImageService;
 import com.isa.OnlyBuns.service.PostService;
 import com.isa.OnlyBuns.service.UserService;
@@ -32,6 +33,9 @@ public class PostController {
     private ImageService imageService;
     @Autowired
     private MeterRegistry meterRegistry;
+
+    @Autowired
+    private AdvertisingService advertisingService;
 
     @GetMapping(value= "/all")
     public ResponseEntity<List<PostDTO>> getAllPosts(){
@@ -199,7 +203,21 @@ public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO, Principa
         return ResponseEntity.ok(postsDTO);
     }
 
+    @PostMapping("/{id}/approve-ad")
+    public ResponseEntity<Void> approvePostForAd(@PathVariable Integer id) {
+        Post post = postService.findOne(id);
 
+        if (post == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        post.setAdApproved(true);
+        postService.save(post);
+
+        advertisingService.sendAdPost(post);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
 
 

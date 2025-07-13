@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public interface ICommentRepository extends JpaRepository<Comment, Integer> {
 
@@ -22,4 +23,6 @@ public interface ICommentRepository extends JpaRepository<Comment, Integer> {
     List<Comment> findByPostIdOrderByCreatedAtDesc(Integer postId);
 
     int countByUserIdAndCreatedAtAfter(long userId, LocalDateTime startTime);
+    @Query("SELECT COUNT(c) FROM Comment c WHERE c.post.userId IN :followedUserIds AND c.createdAt > :since")
+    int countNewCommentsForFollowedUsers(@Param("followedUserIds") Set<Long> followedUserIds, @Param("since") LocalDateTime since);
 }

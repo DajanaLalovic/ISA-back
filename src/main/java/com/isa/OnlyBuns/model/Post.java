@@ -42,6 +42,8 @@ public class Post {
     @Column(name = "is_removed")
     private Boolean isRemoved;
 
+    @Column(name = "ad_approved")
+    private Boolean adApproved = false;
 
     public Post() {
         this.comments = new ArrayList<>();
@@ -134,6 +136,15 @@ public class Post {
     public void setLikes(List<Integer> likes) {
         this.likes = likes;
     }
+
+    public Boolean getAdApproved() {
+        return adApproved;
+    }
+
+    public void setAdApproved(Boolean adApproved) {
+        this.adApproved = adApproved;
+    }
+
 
     @Override
     public String toString() {

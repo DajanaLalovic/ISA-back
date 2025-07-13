@@ -11,6 +11,7 @@ import com.isa.OnlyBuns.model.Address;
 import com.isa.OnlyBuns.model.Role;
 import com.isa.OnlyBuns.model.User;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
@@ -234,6 +235,7 @@ public class UserService implements IUserService {
     }
 
     //pracenje
+    @Transactional
     public void followUser(Long userId,String currentUsername){
         User currentUser=findByUsername(currentUsername);
         User userToFollow=findById(userId);

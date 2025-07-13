@@ -23,6 +23,9 @@ public class CommentService implements ICommentService {
     private IUserRepository userRepository;
     @Autowired
     private IPostRepository postRepository;
+    @Autowired
+    private RateLimiterService rateLimiterService;
+
 
     public Comment findOne(Integer id){return commentRepository.findById(id).orElseGet(null);}
     public Comment save(Comment comment){return commentRepository.save(comment);}
@@ -37,6 +40,10 @@ public class CommentService implements ICommentService {
         User currentUser = userRepository.findByUsername(username);
         if (currentUser == null) {
             throw new IllegalArgumentException("Korisnik nije autentifikovan");
+        }
+        // Provera da li je korisnik premašio limit od 5 komentara po minuti
+        if (!rateLimiterService.allowRequest(currentUser.getId())) {
+            throw new IllegalStateException("Prekoračili ste limit od 5 komentara u poslednjem minutu.");
         }
 
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
@@ -53,7 +60,7 @@ public class CommentService implements ICommentService {
 
         // Provera da li trenutni korisnik prati vlasnika objave
         if (!postOwner.getFollowers().contains(currentUser)) {
-            throw new IllegalArgumentException("Komentarisanje je dozvoljeno samo na objavama naloga koje pratite.");
+            throw new IllegalStateException("Komentarisanje je dozvoljeno samo na objavama naloga koje pratite.");
         }
         Comment comment = new Comment();
         comment.setText(commentDTO.getText());
@@ -62,7 +69,7 @@ public class CommentService implements ICommentService {
         comment.setPost(post);
 
         Comment savedComment = commentRepository.save(comment);
-        return commentRepository.save(savedComment);
+        return savedComment;
     }
 
     public List<Comment> getCommentsForPost(Integer postId) {

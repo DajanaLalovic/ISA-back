@@ -3,7 +3,9 @@ package com.isa.OnlyBuns;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.cache.annotation.EnableCaching;
 
+@EnableCaching
 @SpringBootApplication
 @EnableScheduling
 public class OnlyBunsApplication {

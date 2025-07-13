@@ -11,5 +11,7 @@ public interface IUserRepository extends JpaRepository<User, Long> {
     User findByActivationToken(String activationToken);
     List<User> findByLastLoginBefore(LocalDateTime date);
     User deleteUserByUsername(String username);
+    List<User> findFollowingById(Long id);
+    List<User> findByFollowers_IdAndLastLoginAfter(Long userId, LocalDateTime startTime);
 
 }
