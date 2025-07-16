@@ -31,6 +31,7 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
 
     @Query("SELECT p FROM Post p ORDER BY SIZE(p.likes) DESC")
     List<Post> findTop10MostLikedPosts(Pageable pageable);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Post p WHERE p.id = :id")
     @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value ="0")})
