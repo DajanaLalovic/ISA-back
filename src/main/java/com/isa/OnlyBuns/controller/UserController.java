@@ -223,6 +223,13 @@ public ResponseEntity<List<User>> searchUsers(
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+    @GetMapping("/all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<Map<String, Object>>> getAllBasicUsers() {
+        List<Map<String, Object>> basicUsers = userService.getAllBasicUserInfo();
+        return ResponseEntity.ok(basicUsers);
+    }
+
 
 
 }

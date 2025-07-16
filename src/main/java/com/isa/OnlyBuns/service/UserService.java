@@ -170,6 +170,7 @@ public User save(UserDTO userRequest) {
     address.setCity(userRequest.getCity());
     address.setPostalCode(userRequest.getPostalCode());
     address.setCountry(userRequest.getCountry());
+    u.setActivationSentAt(userRequest.getActivationSentAt());
 
     u.setAddress(address);
 
@@ -382,28 +383,38 @@ public User save(UserDTO userRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Postavljamo prazne liste za followers i following
         for (User follower : user.getFollowers()) {
-            follower.setFollowers(new HashSet<>());  // Prazna lista followers
-            follower.setFollowing(new HashSet<>());  // Prazna lista following
+            follower.setFollowers(new HashSet<>());
+            follower.setFollowing(new HashSet<>());
         }
 
-        return new ArrayList<>(user.getFollowers());  // Vraćamo listu followera sa praznim listama
+        return new ArrayList<>(user.getFollowers());
     }
 
     public List<User> getFollowing(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Postavljamo prazne liste za followers i following
         for (User followedUser : user.getFollowing()) {
-            followedUser.setFollowers(new HashSet<>());  // Prazna lista followers
-            followedUser.setFollowing(new HashSet<>());  // Prazna lista following
+            followedUser.setFollowers(new HashSet<>());
+            followedUser.setFollowing(new HashSet<>());
         }
 
-        return new ArrayList<>(user.getFollowing());  // Vraćamo listu following sa praznim listama
+        return new ArrayList<>(user.getFollowing());
     }
 
+    public List<Map<String, Object>> getAllBasicUserInfo() {
+        return userRepository.findAll().stream().map(user -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", user.getId());
+            map.put("username", user.getUsername());
+            map.put("name", user.getName());
+            map.put("surname", user.getSurname());
+            map.put("email", user.getEmail());
+            map.put("isActive", user.getIsActive());
+            return map;
+        }).toList();
+    }
 
 //    public List<User> getFollowers(Long userId) {
 //        User user = userRepository.findById(userId)

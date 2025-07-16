@@ -14,4 +14,6 @@ public interface  IChatMessageRepository extends JpaRepository<ChatMessage, Inte
             "(m.senderId = :user2 AND m.receiverId = :user1) " +
             "ORDER BY m.timestamp ASC")
     List<ChatMessage> findAllBySenderAndReceiverId(@Param("user1") Integer user1, @Param("user2") Integer user2);
+    List<ChatMessage> findAllByGroupIdOrderByTimestampAsc(Integer groupId);
+
 }

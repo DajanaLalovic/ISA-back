@@ -30,7 +30,7 @@ public class WebConfig {
                 // Koristi uploadDir kao putanju za dinamičko učitavanje slika
                 registry.addResourceHandler("/images/**")
                         .addResourceLocations("file:" + uploadDir + "/") // koristi konfigurabilnu vrednost
-                        .setCachePeriod(0); // Onemogućava keširanje kako bi slike bile odmah dostupne
+                        .setCachePeriod(3600); // Onemogućava keširanje kako bi slike bile odmah dostupne
             }
         };
     }
