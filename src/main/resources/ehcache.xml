@@ -13,5 +13,48 @@
             <heap unit="entries">100</heap>
         </resources>
     </cache>
+    <cache alias="totalPosts">
+        <key-type>java.lang.String</key-type> <!-- može i String ako nema ključ, cache na metod koji vraća broj -->
+        <value-type>java.lang.Long</value-type>
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">10</heap>
+        </resources>
+    </cache>
+
+    <cache alias="postsLast30Days">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.lang.Long</value-type>
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">10</heap>
+        </resources>
+    </cache>
+
+    <cache alias="top5Last7Days">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.util.List</value-type>
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">10</heap>
+        </resources>
+    </cache>
+
+    <cache alias="top10AllTime">
+        <key-type>java.lang.String</key-type>
+        <value-type>java.util.List</value-type>
+        <expiry>
+            <ttl unit="minutes">10</ttl>
+        </expiry>
+        <resources>
+            <heap unit="entries">10</heap>
+        </resources>
+    </cache>
 
 </config>

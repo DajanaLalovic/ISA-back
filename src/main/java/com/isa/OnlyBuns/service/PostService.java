@@ -119,7 +119,7 @@ public class PostService implements IPostService {
         return postRepository.countByUserId(userId);
     }
 
-
+    @CacheEvict(value = {"totalPosts", "postsLast30Days", "top5Last7Days", "top10AllTime"}, allEntries = true)
     public Post addNewPost(PostDTO postDTO, String username) throws IOException {
         User currentUser = userRepository.findByUsername(username);
         if (currentUser == null) {
@@ -178,6 +178,8 @@ public class PostService implements IPostService {
     @Cacheable("top10AllTime")
     public List<Post> getTop10MostLikedPosts() {
         Pageable pageable = PageRequest.of(0, 10); // Ograničavamo na 10 objava
+
+        System.out.println("Fetching top 10 from DB");
         return postRepository.findTop10MostLikedPosts(pageable);
     }
     public int getPostsCountByUser(String username){
@@ -185,5 +187,17 @@ public class PostService implements IPostService {
         List<Post> allPosts=postRepository.getAllByUserId(currentUser.getId());
         return allPosts.size();
     }
+
+    @Override
+    @CacheEvict(cacheNames = {
+            "totalPosts",
+            "postsLast30Days",
+            "top5Last7Days",
+            "top10AllTime"
+    }, allEntries = true)
+    public void  removeCache() {
+        System.out.println("Post caches cleared!");
+    }
+
 
 }

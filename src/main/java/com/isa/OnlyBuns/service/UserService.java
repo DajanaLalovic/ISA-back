@@ -363,6 +363,7 @@ public User save(UserDTO userRequest) {
        try {
            System.out.println("Saving user: " + user.getUsername());
            User savedUser = userRepository.saveAndFlush(user);
+           bloomFilterService.addUsername(savedUser.getUsername());
            System.out.println("User saved: " + savedUser.getUsername());
            return savedUser;
        } catch (DataIntegrityViolationException e) {
