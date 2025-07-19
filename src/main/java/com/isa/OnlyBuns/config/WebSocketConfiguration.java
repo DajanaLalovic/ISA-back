@@ -64,7 +64,7 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
                     }
                 }
                 return false; // ako je token nevalidan, odbij konekciju
-            }
+            }//kommm
 
             @Override
             public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,

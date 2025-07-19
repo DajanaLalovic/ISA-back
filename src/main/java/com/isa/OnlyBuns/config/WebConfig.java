@@ -16,6 +16,8 @@ public class WebConfig {
     @Value("${upload.path}") // Preuzima vrednost upload.path iz application.properties
     private String uploadDir;
 
+
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
