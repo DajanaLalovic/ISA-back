@@ -34,8 +34,9 @@ public interface IPostRepository extends JpaRepository<Post, Integer> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Post p WHERE p.id = :id")
-    @QueryHints({@QueryHint(name = "jakarta.persistence.lock.timeout", value ="0")})
+    @QueryHints(@QueryHint(name = "jakarta.persistence.lock.timeout", value = "0"))
     Post findPostForUpdate(@Param("id") Integer id);
+
 
     List<Post> getAllByUserId(Long id);
     @Query("SELECT p.comments FROM Post p WHERE p.id = :postId")
