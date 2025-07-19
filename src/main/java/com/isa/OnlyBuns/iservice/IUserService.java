@@ -5,6 +5,7 @@ import com.isa.OnlyBuns.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface IUserService {
     User findById(Long id);
@@ -29,4 +30,6 @@ public interface IUserService {
     boolean isFollowing(Long targetUserId, String username);
     List<User> getFollowers(Long userId);
     List<User> getFollowing(Long userId) ;
+
+    List<Map<String, Object>> getAllBasicUserInfo();
 }

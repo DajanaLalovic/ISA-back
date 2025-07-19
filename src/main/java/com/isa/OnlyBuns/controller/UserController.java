@@ -138,11 +138,11 @@ public ResponseEntity<List<User>> searchUsers(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
 ) {
-    List<User> allFilteredUsers = userService.searchUsers(name, surname, email, minPostCount, maxPostCount, sortBy, sortOrder, page, size);
-    int totalUsers = allFilteredUsers.size();
+//    List<User> allFilteredUsers = userService.searchUsers(name, surname, email, minPostCount, maxPostCount, sortBy, sortOrder, page, size);
+//    int totalUsers = allFilteredUsers.size();
 
     List<User> filteredUsers = userService.searchUsers(name, surname, email, minPostCount, maxPostCount, sortBy, sortOrder, 0, Integer.MAX_VALUE);
-    totalUsers = filteredUsers.size();
+    int totalUsers = filteredUsers.size();
 
     int fromIndex = page * size;
     int toIndex = Math.min(fromIndex + size, totalUsers);
@@ -223,6 +223,13 @@ public ResponseEntity<List<User>> searchUsers(
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+    @GetMapping("/all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<Map<String, Object>>> getAllBasicUsers() {
+        List<Map<String, Object>> basicUsers = userService.getAllBasicUserInfo();
+        return ResponseEntity.ok(basicUsers);
+    }
+
 
 
 }

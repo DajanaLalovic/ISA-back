@@ -34,7 +34,7 @@ public class NotificationService {
     private ICommentRepository commentRepository;
 
 
-     @Scheduled(cron = "0 0 9 * * ?")
+    @Scheduled(cron = "0 0 9 * * ?")
     @Transactional(readOnly = true)
     //@Scheduled(cron = "0 */1 * * * ?")
     public void sendWeeklyNotifications() {

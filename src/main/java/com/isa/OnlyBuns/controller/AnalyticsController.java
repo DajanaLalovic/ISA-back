@@ -27,7 +27,6 @@ public class AnalyticsController {
     @GetMapping(value="/statistics")
     @PreAuthorize("isAuthenticated()")
     public Map<String, Double> getStatistics(Principal principal) {
-        System.out.println(analyticsService.getUserActivityStatistics());
         return analyticsService.getUserActivityStatistics();
     }
 }
