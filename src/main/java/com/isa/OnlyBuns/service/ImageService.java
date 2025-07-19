@@ -42,7 +42,6 @@ public class ImageService
         throw new IllegalArgumentException("No picture data");
     }
 
-
     //@Scheduled(cron = "0 * * * * *") // Pokreće se svakog minuta za testiranje
     @Scheduled(cron = "0 0 0 * * *")  // Pokreće se svakog dana u ponoć
     public void compressOldImages() throws IOException {

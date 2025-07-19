@@ -47,21 +47,31 @@ public class PostTests {
             System.out.println("Pokreće se Thread 1");
             postService.likePost(post.getId(), 101);
             try {
-                Thread.sleep(500); // Produženje trajanja transakcije
+                Thread.sleep(700); // drži zaključavanje
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         });
-        Future<?> future2 = executor.submit(() -> postService.likePost(post.getId(), 102));
 
+        Future<?> future2 = executor.submit(() -> {
+            postService.likePost(post.getId(), 102);
+        });
+
+        // prvo čekamo prvi future (završava normalno)
+        future1.get();
+
+        // drugi future treba da baci ExecutionException
         ExecutionException exception = assertThrows(ExecutionException.class, future2::get);
         assertEquals(PessimisticLockingFailureException.class, exception.getCause().getClass());
 
         executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.MINUTES);
 
         Post updatedPost = postRepository.findById(post.getId()).orElseThrow();
         assertEquals(1, updatedPost.getLikes().size(), "Expected only one like due to locking.");
     }
+
+
     @Test
     void testConcurrentLikesShouldResultInTwoLikesWithPessimisticLock() throws InterruptedException {
         // Kreiraj testnu objavu
