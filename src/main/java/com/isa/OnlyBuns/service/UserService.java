@@ -191,8 +191,8 @@ public User save(UserDTO userRequest) {
         user.setEmail(userDTO.getEmail());
         user.setName(userDTO.getName());
         user.setSurname(userDTO.getSurname());
-        user.setPassword(userDTO.getPassword()); // Razmislite o enkripciji lozinke pre nego što je postavite
-        user.setIsActive(userDTO.getIsActive());  // Ako želite da korisnik bude inaktiviran pri registraciji
+        user.setPassword(userDTO.getPassword());
+        user.setIsActive(userDTO.getIsActive());
        user.setActivationToken(userDTO.getActivationToken());
         return user;
     }
@@ -202,9 +202,8 @@ public User save(UserDTO userRequest) {
         userDTO.setEmail(user.getEmail());
         userDTO.setName(user.getName());
         userDTO.setSurname(user.getSurname());
-        // Ako želite, možete vratiti lozinku ili je sakriti
-        userDTO.setPassword(user.getPassword());  // Ipak, preporučuje se da lozinku ne šaljete u DTO
-        userDTO.setIsActive(user.getIsActive());  // Ako je ovo potrebno u DTO
+        userDTO.setPassword(user.getPassword());
+        userDTO.setIsActive(user.getIsActive());
         userDTO.setActivationToken(user.getActivationToken());
         userDTO.setFollowingCount(user.getFollowingCount());
        // userDTO.setPostCount(user.getPostCount());
@@ -254,7 +253,18 @@ public User save(UserDTO userRequest) {
             return new ArrayList<>();
         }
 
-        return filteredUsers.subList(fromIndex, toIndex);
+//        return filteredUsers.subList(fromIndex, toIndex);
+        List<User> paginatedUsers = filteredUsers.subList(fromIndex, toIndex);
+
+        for (User user : paginatedUsers) {
+            user.setPassword(null);
+            user.setFollowers(new HashSet<>());
+            user.setFollowing(new HashSet<>());
+            user.setGroups(new HashSet<>());
+            user.setAddress(null);
+        }
+
+        return paginatedUsers;
         // return filteredUsers;
     }
 
@@ -289,10 +299,9 @@ public User save(UserDTO userRequest) {
         System.out.println("Deleted inactive accounts older than  days.");
     }
 
-   // @Scheduled(cron = "0 0 0 L * ?") //brisanje poslednjeg dana u mesecu-u ponoc
-   @Scheduled(cron = "0 */2 * * * ?") // radi provere-brisanje svake dve minute
+    @Scheduled(cron = "0 0 0 L * ?") //brisanje poslednjeg dana u mesecu-u ponoc
+//   @Scheduled(cron = "0 */2 * * * ?") // radi provere-brisanje svake dve minute
    public void scheduledCleanUp() {
-//        int retentionDays = 30;
         deleteInactiveAccounts();
     }
 
@@ -412,22 +421,10 @@ public User save(UserDTO userRequest) {
             map.put("surname", user.getSurname());
             map.put("email", user.getEmail());
             map.put("isActive", user.getIsActive());
+            map.put("role",user.getRole());
             return map;
         }).toList();
     }
-
-//    public List<User> getFollowers(Long userId) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-//        return new ArrayList<>(user.getFollowers());
-//    }
-//
-//
-//    public List<User> getFollowing(Long userId) {
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-//        return new ArrayList<>(user.getFollowing());
-//    }
 
 }
 

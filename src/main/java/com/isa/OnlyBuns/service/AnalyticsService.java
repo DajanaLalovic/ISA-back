@@ -6,11 +6,12 @@ import com.isa.OnlyBuns.irepository.IUserRepository;
 import com.isa.OnlyBuns.model.Post;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.isa.OnlyBuns.model.User;
+
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AnalyticsService {
@@ -70,18 +71,62 @@ public class AnalyticsService {
         return analytics;
     }
 
-    public Map<String,Double> getUserActivityStatistics(){
-        long totalUsers=userRepository.findAll().size();
+//    public Map<String,Double> getUserActivityStatistics(){
+//        long totalUsers=userRepository.findAll().size();
+//
+//        long usersWithPosts=postRepository.findDistinctUserIds().size();
+//        long usersWithComments = commentRepository.findDistinctUserIds().size();
+//
+//        long usersWithoutActivity = totalUsers - (usersWithPosts + usersWithComments);
+//        Map<String, Double> statistics = new HashMap<>();
+//        statistics.put("usersWithPosts", (double) usersWithPosts / totalUsers * 100);
+//        statistics.put("usersWithComments", (double) usersWithComments / totalUsers * 100);
+//        statistics.put("usersWithoutActivity", (double) usersWithoutActivity / totalUsers * 100);
+//        return statistics;
+//    }
+public Map<String, Double> getUserActivityStatistics() {
+    List<Long> allUserIds = userRepository.findAll()
+            .stream()
+            .map(User::getId)
+            .toList();
 
-        long usersWithPosts=postRepository.findDistinctUserIds().size();
-        long usersWithComments = commentRepository.findDistinctUserIds().size();
+    Set<Long> postUserIds = new HashSet<>(postRepository.findDistinctUserIds());
+    Set<Long> commentUserIds = new HashSet<>(commentRepository.findDistinctUserIds());
 
-        long usersWithoutActivity = totalUsers - (usersWithPosts + usersWithComments);
-        Map<String, Double> statistics = new HashMap<>();
-        statistics.put("usersWithPosts", (double) usersWithPosts / totalUsers * 100);
-        statistics.put("usersWithComments", (double) usersWithComments / totalUsers * 100);
-        statistics.put("usersWithoutActivity", (double) usersWithoutActivity / totalUsers * 100);
-        return statistics;
-    }
+    System.out.println("All Users: " + allUserIds.size());
+    System.out.println("User IDs with Posts: " + postUserIds);
+    System.out.println("User IDs with Comments: " + commentUserIds);
+
+    Set<Long> onlyCommenters = new HashSet<>(commentUserIds);
+    onlyCommenters.removeAll(postUserIds);
+
+    System.out.println("Only Commenters: " + onlyCommenters);
+
+    Set<Long> noActivity = allUserIds.stream()
+            .filter(id -> !postUserIds.contains(id) && !commentUserIds.contains(id))
+            .collect(Collectors.toSet());
+
+    System.out.println("Users without any activity: " + noActivity);
+
+    int totalUsers = allUserIds.size();
+
+    Map<String, Double> stats = new HashMap<>();
+    stats.put("usersWithPosts", postUserIds.size() * 100.0 / totalUsers);
+    stats.put("usersWithOnlyComments", onlyCommenters.size() * 100.0 / totalUsers);
+    stats.put("usersWithoutActivity", noActivity.size() * 100.0 / totalUsers);
+
+    System.out.println("Final stats: " + stats);
+
+    return stats;
+}
+
+
+
+
+
+
+
+
+
 
 }
