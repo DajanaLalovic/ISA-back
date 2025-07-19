@@ -20,6 +20,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value="/api/groups",produces= MediaType.APPLICATION_JSON_VALUE)
@@ -77,32 +79,50 @@ public class GroupController {
         }
     }
 
+//    @PutMapping("/removeUser/{groupId}")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<GroupDTO> removeUser(@PathVariable Integer groupId, Principal principal) {
+//        try {
+//            User currentUser = userService.findByUsername(principal.getName());
+//            if (currentUser == null) {
+//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//            }
+//            groupService.removeUserFromGroup(groupId,currentUser);
+//            return new ResponseEntity<>( HttpStatus.OK);
+//        } catch (IllegalArgumentException e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
     @PutMapping("/removeUser/{groupId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<GroupDTO> removeUser(@PathVariable Integer groupId, Principal principal) {
+    public ResponseEntity<GroupDTO> removeUser(@PathVariable Integer groupId, @RequestBody Map<String, Long> body) {
         try {
-            User currentUser = userService.findByUsername(principal.getName());
-            if (currentUser == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            groupService.removeUserFromGroup(groupId,currentUser);
-            return new ResponseEntity<>( HttpStatus.OK);
+            Long userId = body.get("userId");
+            if (userId == null) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+            User user = userService.findById(userId);
+            groupService.removeUserFromGroup(groupId, user);
+            return new ResponseEntity<>(HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
+
     //ili groupDTO?
     @GetMapping("/all")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Group>> getGroupsForUser(Principal principal) {
+    public ResponseEntity<List<GroupDTO>> getGroupsForUser(Principal principal) {
         try{
             User currentUser = userService.findByUsername(principal.getName());
             if (currentUser == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             List<Group> allGroups=groupService.getGroupsForUser(currentUser.getId());
-            return new ResponseEntity<>(allGroups, HttpStatus.OK);
+            List<GroupDTO> dtoList = allGroups.stream()
+                    .map(GroupDTO::new)
+                    .collect(Collectors.toList());
+            return new ResponseEntity<>(dtoList, HttpStatus.OK);
 
         }catch (IllegalArgumentException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -121,18 +141,30 @@ public class GroupController {
         }
     }
 
+//    @GetMapping("/chat/{groupId}")
+//    @PreAuthorize("isAuthenticated()")
+//    public ResponseEntity<List<ChatMessage>> getChatMessages(@PathVariable Integer groupId, Principal principal) {
+//        try{
+//            List<ChatMessage> lastTenMessages=chatMessageService.getLastMessages(groupId);
+//            return new ResponseEntity<>(lastTenMessages, HttpStatus.OK);
+//        }
+//        catch (IllegalArgumentException e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//
+//        }
+//    }
     @GetMapping("/chat/{groupId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ChatMessage>> getChatMessages(@PathVariable Integer groupId, Principal principal) {
-        try{
-            List<ChatMessage> lastTenMessages=chatMessageService.getLastMessages(groupId);
-            return new ResponseEntity<>(lastTenMessages, HttpStatus.OK);
-        }
-        catch (IllegalArgumentException e) {
+        try {
+            User currentUser = userService.findByUsername(principal.getName());
+            List<ChatMessage> messages = chatMessageService.getRelevantMessages(groupId, currentUser.getId());
+            return new ResponseEntity<>(messages, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
         }
     }
+
     //CUVANJE PORUKA???
 
     //dodaj ako treba
@@ -170,6 +202,47 @@ public class GroupController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+    @GetMapping("/direct")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<GroupDTO>> getDirectChats(Principal principal) {
+        User currentUser = userService.findByUsername(principal.getName());
+        List<Group> allGroups = groupService.getGroupsForUser(currentUser.getId());
+        List<Group> directChats = allGroups.stream()
+                .filter(g -> g.getGroupName() == null)
+                .collect(Collectors.toList());
+
+        List<GroupDTO> dtos = directChats.stream()
+                .map(GroupDTO::new)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
+    }
+    @PostMapping("/directChat")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<GroupDTO> getOrCreateDirectChat(@RequestBody Map<String, Long> payload,Principal principal) {
+        Long userId1 = payload.get("userId1");
+        Long userId2 = payload.get("userId2");
+
+        Optional<Group> existing = groupService.findDirectChat(userId1, userId2);
+        if (existing.isPresent()) {
+            return new ResponseEntity<>(new GroupDTO(existing.get()), HttpStatus.OK);
+        }
+
+        User u1 = userService.findById(userId1);
+        User u2 = userService.findById(userId2);
+
+        if (u1 == null || u2 == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Group created = groupService.createDirectChat(u1, u2);
+        return new ResponseEntity<>(new GroupDTO(created), HttpStatus.CREATED);
+    }
+
+
+
+
+
 
 
 

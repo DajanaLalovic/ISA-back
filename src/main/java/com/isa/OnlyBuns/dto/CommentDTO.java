@@ -9,7 +9,7 @@ public class CommentDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer postId; // ID posta za koji je komentar vezan
-
+    private String username;
     public CommentDTO() {
     }
 
@@ -77,6 +77,14 @@ public class CommentDTO {
 
     public void setPostId(Integer postId) {
         this.postId = postId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override

@@ -28,4 +28,6 @@ public interface ICommentRepository extends JpaRepository<Comment, Integer> {
     @Query("SELECT DISTINCT c.userId FROM Comment c")
     List<Long> findDistinctUserIds();
 
+    @Query(value = "SELECT COUNT(*) FROM comment WHERE user_id = :userId", nativeQuery = true)
+    Long countByUserId(@Param("userId") Long userId);
 }

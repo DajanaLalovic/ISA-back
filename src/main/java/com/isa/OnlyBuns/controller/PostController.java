@@ -71,12 +71,7 @@ public class PostController {
 
         return new ResponseEntity<>(postDTO, HttpStatus.OK);
     }
-//    @PutMapping(value = "/updatePost/{id}", consumes = "application/json")
-//    public ResponseEntity<PostDTO> updatePost(@PathVariable Integer id, @RequestBody PostDTO postDTO) {
-//        Post updatedPost = postService.updatePost(id, postDTO);
-//        PostDTO updatedPostDTO = new PostDTO(updatedPost);
-//        return new ResponseEntity<>(updatedPostDTO, HttpStatus.OK);
-//    }
+
 @PutMapping(consumes = "application/json")
 @PreAuthorize("isAuthenticated()")
 public ResponseEntity<PostDTO> updatePost(@RequestBody PostDTO postDTO, Principal principal) throws IOException {

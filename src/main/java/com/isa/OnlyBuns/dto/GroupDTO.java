@@ -21,6 +21,7 @@ public class GroupDTO {
         this.groupName= group.getGroupName();
         this.adminId=group.getAdminId();
         this.memberUsernames=group.getMembers().stream().map(User::getUsername).collect(Collectors.toSet());
+
     }
 
     public Integer getId() {return id;}
