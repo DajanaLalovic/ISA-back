@@ -39,7 +39,7 @@ public class NotificationService {
     //@Scheduled(cron = "0 */1 * * * ?")
     public void sendWeeklyNotifications() {
         System.out.println(">> sendWeeklyNotifications() triggered!");
-        final LocalDateTime sevenDaysAgo = LocalDateTime.now().minusMinutes(2);
+        final LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
 
         List<User> inactiveUsers = userRepository.findByLastLoginBefore(sevenDaysAgo);
         System.out.println("Found inactive users: " + inactiveUsers.size());

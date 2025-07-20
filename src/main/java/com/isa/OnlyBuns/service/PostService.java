@@ -89,12 +89,26 @@ public class PostService implements IPostService {
             postRepository.save(post);
         }
     }
+
+    private boolean simulateDelay = false;
+
+    public void enableTestDelay() {
+        simulateDelay = true;
+    }
+
     @Transactional(readOnly = false)
     public Post likePost(Integer postId, Integer userId) {
         logger.info("> Trying to like post with ID: {}", postId);
 
         // Pesimističko zaključavanje
         Post post = postRepository.findPostForUpdate(postId);
+        if (simulateDelay) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
 
         if (!post.getLikes().contains(userId)) {
             post.getLikes().add(userId);
