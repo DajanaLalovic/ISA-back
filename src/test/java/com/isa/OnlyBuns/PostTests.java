@@ -4,6 +4,7 @@ import com.isa.OnlyBuns.irepository.IPostRepository;
 import com.isa.OnlyBuns.model.Location;
 import com.isa.OnlyBuns.model.Post;
 import com.isa.OnlyBuns.service.PostService;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +16,7 @@ import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+//@Disabled
 @SpringBootTest
 public class PostTests {
 

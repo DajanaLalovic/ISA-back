@@ -32,7 +32,6 @@ public class WebConfig {
 
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
-                // Koristi uploadDir kao putanju za dinamičko učitavanje slika
                 registry.addResourceHandler("/images/**")
                         .addResourceLocations("file:" + uploadDir + "/")
 //                        .setCachePeriod(3600);
