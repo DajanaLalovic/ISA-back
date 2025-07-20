@@ -427,6 +427,50 @@ public User save(UserDTO userRequest) {
         }).toList();
     }
 
+
+    @Transactional
+    public void updateProfile(Long userId, Map<String, Object> updateData) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Ažuriranje osnovnih podataka
+        if (updateData.containsKey("name")) {
+            user.setName((String) updateData.get("name"));
+        }
+        if (updateData.containsKey("surname")) {
+            user.setSurname((String) updateData.get("surname"));
+        }
+
+        // Ažuriranje adrese
+        if (updateData.containsKey("address")) {
+            Map<String, Object> addressMap = (Map<String, Object>) updateData.get("address");
+            Address address = user.getAddress();
+            if (address == null) {
+                address = new Address(); // ako slučajno nema, kreiraj novu
+            }
+
+            if (addressMap.containsKey("street")) {
+                address.setStreet((String) addressMap.get("street"));
+            }
+            if (addressMap.containsKey("number")) {
+                address.setNumber((String) addressMap.get("number"));
+            }
+            if (addressMap.containsKey("city")) {
+                address.setCity((String) addressMap.get("city"));
+            }
+            if (addressMap.containsKey("country")) {
+                address.setCountry((String) addressMap.get("country"));
+            }
+            if (addressMap.containsKey("postalCode")) {
+                address.setPostalCode((String) addressMap.get("postalCode"));
+            }
+
+            user.setAddress(address);
+        }
+
+        userRepository.save(user);
+    }
+
 }
 
 

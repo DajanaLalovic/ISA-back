@@ -77,6 +77,9 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/getOneUser/**").permitAll()
                         .requestMatchers("/api/locations/**").permitAll()
                         .requestMatchers("/api/trends").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/load/test").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/load/posts").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/groups/test").permitAll()
                         .anyRequest().authenticated() // Sve ostale zahteve traži autentifikacija
                 )
                 .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService()), BasicAuthenticationFilter.class)

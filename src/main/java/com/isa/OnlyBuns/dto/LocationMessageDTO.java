@@ -14,6 +14,8 @@ public class LocationMessageDTO implements Serializable {
     private String city;
     private String postalCode;
     private String country;
+    private double latitude;
+    private double longitude;
 
     // Default no-argument constructor
     public LocationMessageDTO() {
@@ -76,6 +78,22 @@ public class LocationMessageDTO implements Serializable {
         this.country = country;
     }
 
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
     // Constructor with parameters for JSON deserialization
     @JsonCreator
     public LocationMessageDTO(
@@ -85,7 +103,9 @@ public class LocationMessageDTO implements Serializable {
             @JsonProperty("number") String number,
             @JsonProperty("city") String city,
             @JsonProperty("postalCode") String postalCode,
-            @JsonProperty("country") String country
+            @JsonProperty("country") String country,
+            @JsonProperty("longitude") double longitude,
+            @JsonProperty("latitude") double latitude
     ) {
         this.id = id;
         this.name = name;
@@ -94,5 +114,7 @@ public class LocationMessageDTO implements Serializable {
         this.city = city;
         this.postalCode = postalCode;
         this.country = country;
+        this.longitude = longitude;
+        this.latitude = latitude;
     }
 }

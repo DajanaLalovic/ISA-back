@@ -8,6 +8,7 @@ import com.isa.OnlyBuns.model.User;
 import com.isa.OnlyBuns.service.ChatMessageService;
 import com.isa.OnlyBuns.service.GroupService;
 import com.isa.OnlyBuns.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -165,9 +166,6 @@ public class GroupController {
         }
     }
 
-    //CUVANJE PORUKA???
-
-    //dodaj ako treba
 
     @PostMapping("/send")
     @PreAuthorize("isAuthenticated()")
@@ -240,6 +238,11 @@ public class GroupController {
     }
 
 
+    //load balancer test
+    @GetMapping("/test")
+    public String test(HttpServletRequest request){
+        return "Response from port: "+request.getLocalPort();
+    }
 
 
 
