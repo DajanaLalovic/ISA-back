@@ -32,4 +32,5 @@ public interface IUserService {
     List<User> getFollowing(Long userId) ;
 
     List<Map<String, Object>> getAllBasicUserInfo();
-}
+    void updateProfile(Long userId, Map<String, Object> updateData);
+    }

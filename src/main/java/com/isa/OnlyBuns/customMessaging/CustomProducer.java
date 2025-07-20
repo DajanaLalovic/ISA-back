@@ -13,7 +13,7 @@ public class CustomProducer {
     private static final Logger log = LoggerFactory.getLogger(CustomProducer.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void send(String queueName, LocationMessageDTO message) {
+   /* public void send(String queueName, LocationMessageDTO message) {
         try {
             String json = objectMapper.writeValueAsString(message);
             MessageQueueManager.sendMessage(queueName, json);
@@ -21,5 +21,14 @@ public class CustomProducer {
         } catch (Exception e) {
             log.error("Failed to serialize message", e);
         }
-    }
+    }*/
+   public <T> void send(String queueName, T message) {
+       try {
+           String json = objectMapper.writeValueAsString(message);
+           MessageQueueManager.sendMessage(queueName, json);
+           log.info("CustomProducer sent message to " + queueName + ": " + json);
+       } catch (Exception e) {
+           log.error("Failed to serialize message", e);
+       }
+   }
 }

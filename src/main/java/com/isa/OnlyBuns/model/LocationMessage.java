@@ -27,6 +27,11 @@ public class LocationMessage {
     @Column(name = "country", nullable = false)
     private String country;
 
+    @Column(nullable = false)
+    private double latitude;
+
+    @Column(nullable = false)
+    private double longitude;
 
     // Getters and setters
 
@@ -85,4 +90,21 @@ public class LocationMessage {
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
     }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
 }

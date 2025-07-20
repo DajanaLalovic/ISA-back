@@ -231,5 +231,16 @@ public ResponseEntity<List<User>> searchUsers(
     }
 
 
+    @PutMapping("/updateprofile/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> updateProfile(@PathVariable Long id, @RequestBody Map<String, Object> updateData) {
+        try {
+            userService.updateProfile(id, updateData);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
 }
